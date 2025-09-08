@@ -1,5 +1,3 @@
-// ignore: unused_import
-import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -15,8 +13,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get yes => 'Ja';
 
   @override
-  String get mainNoCares =>
-      'Juhu! Sie haben keine ausstehenden Pflanzen, um die Sie sich kümmern müssen.';
+  String get mainNoCares => 'Juhu! Sie haben keine ausstehenden Pflanzen, um die Sie sich kümmern müssen.';
 
   @override
   String get mainNoPlants => 'Der Garten ist leer, sollen wir etwas pflanzen?';
@@ -100,8 +97,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get careAll => 'Haben Sie sich um alle Pflanzen gekümmert?';
 
   @override
-  String get careAllBody =>
-      'Mit dieser Aktion werden alle Pflanzen als für den heutigen Zyklus gepflegt markiert.';
+  String get careAllBody => 'Mit dieser Aktion werden alle Pflanzen als für den heutigen Zyklus gepflegt markiert.';
 
   @override
   String get water => 'Gießen';
@@ -167,8 +163,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get aboutFloraeButton => 'Über Florae';
 
   @override
-  String get notificationInfo =>
-      'Die Benachrichtigungszeit wird zurückgesetzt, wenn Sie die App aufrufen.\n\nBitte beachten Sie, dass einige Geräte sehr aggressive Batterieoptimierungen durchführen, die dazu führen können, dass Benachrichtigungen nicht korrekt ausgegeben werden.';
+  String get notificationInfo => 'Die Benachrichtigungszeit wird zurückgesetzt, wenn Sie die App aufrufen.\n\nBitte beachten Sie, dass einige Geräte sehr aggressive Batterieoptimierungen durchführen, die dazu führen können, dass Benachrichtigungen nicht korrekt ausgegeben werden.';
 
   @override
   String get careNotificationTitle => 'Pflanzen brauchen Pflege';
@@ -177,15 +172,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get careNotificationName => 'Pflegehinweise';
 
   @override
-  String get careNotificationDescription =>
-      'Benachrichtigungen zur Pflanzenpflege erhalten';
+  String get careNotificationDescription => 'Benachrichtigungen zur Pflanzenpflege erhalten';
 
   @override
   String get deletePlantTitle => 'Pflanze löschen';
 
   @override
-  String get deletePlantBody =>
-      'Sie werden Ihre Pflanze nun endgültig beseitigen, diese Aktion kann nicht mehr rückgängig gemacht werden.';
+  String get deletePlantBody => 'Sie werden Ihre Pflanze nun endgültig beseitigen, diese Aktion kann nicht mehr rückgängig gemacht werden.';
 
   @override
   String get exportData => 'Garten exportieren';
@@ -194,12 +187,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get importData => 'Garten importieren';
 
   @override
-  String get unsuccessfullyRestore =>
-      'Die Sicherung konnte nicht wiederhergestellt werden.';
+  String get unsuccessfullyRestore => 'Die Sicherung konnte nicht wiederhergestellt werden.';
 
   @override
-  String get unsuccessfullyBackup =>
-      'Es konnte keine Sicherungsdatei erstellt werden.';
+  String get unsuccessfullyBackup => 'Es konnte keine Sicherungsdatei erstellt werden.';
 
   @override
   String get atDay => 'Morgens';

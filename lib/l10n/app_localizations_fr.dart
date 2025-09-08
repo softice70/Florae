@@ -1,5 +1,3 @@
-// ignore: unused_import
-import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -15,12 +13,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get yes => 'Oui';
 
   @override
-  String get mainNoCares =>
-      'Youpi ! Vous n\'avez aucune plante en attente de soin';
+  String get mainNoCares => 'Youpi ! Vous n\'avez aucune plante en attente de soin';
 
   @override
-  String get mainNoPlants =>
-      'Le jardin est vide, pourquoi ne pas planter quelque chose ?';
+  String get mainNoPlants => 'Le jardin est vide, pourquoi ne pas planter quelque chose ?';
 
   @override
   String get buttonGarden => 'Jardin';
@@ -101,8 +97,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get careAll => 'Avez-vous pris soin de toutes vos plantes ?';
 
   @override
-  String get careAllBody =>
-      'Cette action marquera toutes vos plantes comme soignées pour aujourd\'hui';
+  String get careAllBody => 'Cette action marquera toutes vos plantes comme soignées pour aujourd\'hui';
 
   @override
   String get water => 'Arroser';
@@ -168,8 +163,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get aboutFloraeButton => 'À propos de Florae';
 
   @override
-  String get notificationInfo =>
-      'Le temps de notiification sera remis à zéro à l\'ouverture de l\'application.\n\nNotez que certains appareils sont programmés pour des optimisations de batterie aggressives, qui peuvent influencer le compprtement des notifications';
+  String get notificationInfo => 'Le temps de notiification sera remis à zéro à l\'ouverture de l\'application.\n\nNotez que certains appareils sont programmés pour des optimisations de batterie aggressives, qui peuvent influencer le compprtement des notifications';
 
   @override
   String get careNotificationTitle => 'Vos plantes ont besoin de soin';
@@ -178,15 +172,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get careNotificationName => 'Rappel soins';
 
   @override
-  String get careNotificationDescription =>
-      'Recevoir des notifications pour le soin des plantes';
+  String get careNotificationDescription => 'Recevoir des notifications pour le soin des plantes';
 
   @override
   String get deletePlantTitle => 'Supprimer plante';
 
   @override
-  String get deletePlantBody =>
-      'La suppression d\'une plante est définitive. Cette action est irréversible';
+  String get deletePlantBody => 'La suppression d\'une plante est définitive. Cette action est irréversible';
 
   @override
   String get exportData => 'Exporter des données';
@@ -198,8 +190,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get unsuccessfullyRestore => 'Impossible de restaurer la sauvegarde.';
 
   @override
-  String get unsuccessfullyBackup =>
-      'Impossible de créer un fichier de sauvegarde.';
+  String get unsuccessfullyBackup => 'Impossible de créer un fichier de sauvegarde.';
 
   @override
   String get atDay => 'De jour';

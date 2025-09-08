@@ -1,5 +1,3 @@
-// ignore: unused_import
-import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -99,8 +97,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get careAll => 'هل اعتنيت بجميع النباتات';
 
   @override
-  String get careAllBody =>
-      'سيعين هذا الأمر أنك اعتنيت بجميع النباتات لهذا اليوم';
+  String get careAllBody => 'سيعين هذا الأمر أنك اعتنيت بجميع النباتات لهذا اليوم';
 
   @override
   String get water => 'سقاية';
@@ -166,8 +163,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get aboutFloraeButton => 'عن فلوراي';
 
   @override
-  String get notificationInfo =>
-      'سيتم إعادة ضبط وقت الإشعارات عند دخولك للتطبيق مجدداً.\n\n مع العلم بأن بعض الأجهزة تطبق سياسة توفير طاقة شديدة قد تؤدي إلى عدم إصدار الإشعارات بشكل صحيح.';
+  String get notificationInfo => 'سيتم إعادة ضبط وقت الإشعارات عند دخولك للتطبيق مجدداً.\n\n مع العلم بأن بعض الأجهزة تطبق سياسة توفير طاقة شديدة قد تؤدي إلى عدم إصدار الإشعارات بشكل صحيح.';
 
   @override
   String get careNotificationTitle => 'نباتات بحاجة إلى عناية';
@@ -176,15 +172,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get careNotificationName => 'تذكير العناية';
 
   @override
-  String get careNotificationDescription =>
-      'استلم إشعارات العناية عند حاجة نباتاتك إلى إهتمام';
+  String get careNotificationDescription => 'استلم إشعارات العناية عند حاجة نباتاتك إلى إهتمام';
 
   @override
   String get deletePlantTitle => 'حذف الغرس';
 
   @override
-  String get deletePlantBody =>
-      'أنت على وشك حذف نباتك بشكل نهائي، هذا الفعل لا عودة عنه.';
+  String get deletePlantBody => 'أنت على وشك حذف نباتك بشكل نهائي، هذا الفعل لا عودة عنه.';
 
   @override
   String get exportData => 'Export garden';

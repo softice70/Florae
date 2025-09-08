@@ -1,5 +1,3 @@
-// ignore: unused_import
-import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -99,8 +97,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get careAll => 'Have you taken care of all the plants?';
 
   @override
-  String get careAllBody =>
-      'This action will mark all plants as cared for today cycle.';
+  String get careAllBody => 'This action will mark all plants as cared for today cycle.';
 
   @override
   String get water => 'Water';
@@ -166,8 +163,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutFloraeButton => 'About Florae';
 
   @override
-  String get notificationInfo =>
-      'The notification time will be reset when you enter the App.\n\nPlease note that some devices perform very aggressive battery optimizations that may cause notifications to not be issued correctly.';
+  String get notificationInfo => 'The notification time will be reset when you enter the App.\n\nPlease note that some devices perform very aggressive battery optimizations that may cause notifications to not be issued correctly.';
 
   @override
   String get careNotificationTitle => 'Plants require care';
@@ -182,8 +178,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deletePlantTitle => 'Delete plant';
 
   @override
-  String get deletePlantBody =>
-      'You are going to proceed to eliminate your plant definitively, this action cannot be undone.';
+  String get deletePlantBody => 'You are going to proceed to eliminate your plant definitively, this action cannot be undone.';
 
   @override
   String get exportData => 'Export garden';

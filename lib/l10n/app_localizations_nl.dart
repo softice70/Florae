@@ -1,5 +1,3 @@
-// ignore: unused_import
-import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -15,8 +13,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get yes => 'Ja';
 
   @override
-  String get mainNoCares =>
-      'Hoera! Je hebt geen planten die wachten op verzorging';
+  String get mainNoCares => 'Hoera! Je hebt geen planten die wachten op verzorging';
 
   @override
   String get mainNoPlants => 'De tuin is leeg, zullen we iets gaan planten?';
@@ -100,8 +97,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get careAll => 'Heb je alle planten verzorgd?';
 
   @override
-  String get careAllBody =>
-      'Deze actie markeert alle planten als verzorgd voor de cyclus van vandaag.';
+  String get careAllBody => 'Deze actie markeert alle planten als verzorgd voor de cyclus van vandaag.';
 
   @override
   String get water => 'Water';
@@ -167,8 +163,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get aboutFloraeButton => 'Over Florae';
 
   @override
-  String get notificationInfo =>
-      'De notificatie tijd zal gereset worden wanneer je de App opent.\n\nLet er op dat sommige apparaten erg aggresieve batterij optimisaties doen, die er voor kunnen zorgen dat notificaties niet aankomen.';
+  String get notificationInfo => 'De notificatie tijd zal gereset worden wanneer je de App opent.\n\nLet er op dat sommige apparaten erg aggresieve batterij optimisaties doen, die er voor kunnen zorgen dat notificaties niet aankomen.';
 
   @override
   String get careNotificationTitle => 'Planten die verzorging nodig hebben';
@@ -177,15 +172,13 @@ class AppLocalizationsNl extends AppLocalizations {
   String get careNotificationName => 'Verzorgings herinnering';
 
   @override
-  String get careNotificationDescription =>
-      'Ontvang plant verzorging notificaties';
+  String get careNotificationDescription => 'Ontvang plant verzorging notificaties';
 
   @override
   String get deletePlantTitle => 'Verwijder plant';
 
   @override
-  String get deletePlantBody =>
-      'Je gaat je plant definitief elimineren, deze actie kan niet ongedaan worden gemaakt.';
+  String get deletePlantBody => 'Je gaat je plant definitief elimineren, deze actie kan niet ongedaan worden gemaakt.';
 
   @override
   String get exportData => 'Export garden';
