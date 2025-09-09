@@ -1,0 +1,455 @@
+import 'dart:io';
+
+import 'package:florae/data/plant.dart';
+import 'package:florae/screens/care_plant.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+import '../data/care.dart';
+import '../data/default.dart';
+import '../l10n/app_localizations.dart';
+import '../main.dart';
+
+class CareCalendarScreen extends StatefulWidget {
+  const CareCalendarScreen({Key? key, required this.title}) : super(key: key);
+
+  final String title;
+
+  @override
+  State<CareCalendarScreen> createState() => _CareCalendarScreenState();
+}
+
+class _CareCalendarScreenState extends State<CareCalendarScreen> {
+  List<CareScheduleDay> _careSchedule = [];
+  bool _isLoading = false;
+  bool _hasMoreData = true;
+  final ScrollController _scrollController = ScrollController();
+  int _loadedDays = 0;
+  static const int _daysPerLoad = 7;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCareSchedule();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        !_isLoading &&
+        _hasMoreData) {
+      _loadMoreCareSchedule();
+    }
+  }
+
+  Future<void> _loadCareSchedule() async {
+    setState(() {
+      _isLoading = true;
+      _careSchedule.clear();
+      _loadedDays = 0;
+    });
+
+    await _loadMoreCareSchedule();
+  }
+
+  Future<void> _loadMoreCareSchedule() async {
+    if (_isLoading || !_hasMoreData) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      List<Plant> allPlants = await garden.getAllPlants();
+      DateTime startDate = DateTime.now().add(Duration(days: _loadedDays));
+      List<CareScheduleDay> newSchedule = _calculateCareSchedule(
+        allPlants,
+        startDate,
+        _daysPerLoad,
+      );
+
+      setState(() {
+        _careSchedule.addAll(newSchedule);
+        _loadedDays += _daysPerLoad;
+        _hasMoreData = newSchedule.isNotEmpty;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading care schedule: $e');
+      setState(() {
+        _isLoading = false;
+        _hasMoreData = false;
+      });
+    }
+  }
+
+  List<CareScheduleDay> _calculateCareSchedule(
+      List<Plant> plants, DateTime startDate, int maxDays) {
+    Map<String, Map<String, PlantCareTask>> scheduleMap = {};
+    DateTime today = DateTime.now();
+    DateTime currentDate = DateTime(today.year, today.month, today.day);
+
+    // 计算每个植物的待执行养护任务
+    for (Plant plant in plants) {
+      if (plant.cares.isEmpty) continue;
+      
+      Map<String, PlantCareTask> plantTasks = {};
+      
+      for (Care care in plant.cares) {
+        if (care.cycles <= 0 || care.effected == null) continue;
+
+        // 计算下次应该执行的日期
+        DateTime lastCareDate = DateTime(
+          care.effected!.year,
+          care.effected!.month,
+          care.effected!.day,
+        );
+        DateTime nextCareDate = lastCareDate.add(Duration(days: care.cycles));
+        bool isOverdue = false;
+
+        // 如果已经逾期，设为今天
+        if (nextCareDate.isBefore(currentDate)) {
+          nextCareDate = currentDate;
+          isOverdue = true;
+        }
+
+        // 只显示从今天开始的任务
+        if (!nextCareDate.isBefore(currentDate)) {
+          String dateKey = DateFormat('yyyy-MM-dd').format(nextCareDate);
+          String taskKey = '${plant.id}_${care.name}';
+          
+          plantTasks[taskKey] = PlantCareTask(
+            plant: plant,
+            care: care,
+            isOverdue: isOverdue,
+          );
+          
+          if (scheduleMap[dateKey] == null) {
+            scheduleMap[dateKey] = {};
+          }
+          scheduleMap[dateKey]![taskKey] = plantTasks[taskKey]!;
+        }
+      }
+    }
+
+    // 按植物分组任务
+    Map<String, List<PlantCareTask>> groupedSchedule = {};
+    scheduleMap.forEach((dateKey, tasks) {
+      Map<String, List<PlantCareTask>> plantGroups = {};
+      
+      tasks.forEach((taskKey, task) {
+        String plantKey = task.plant.id.toString();
+        if (plantGroups[plantKey] == null) {
+          plantGroups[plantKey] = [];
+        }
+        plantGroups[plantKey]!.add(task);
+      });
+      
+      groupedSchedule[dateKey] = [];
+      plantGroups.forEach((plantKey, plantTasks) {
+        // 每个植物只添加一条记录，但包含所有养护任务
+        if (plantTasks.isNotEmpty) {
+          groupedSchedule[dateKey]!.add(PlantCareTask(
+            plant: plantTasks.first.plant,
+            care: plantTasks.first.care,
+            isOverdue: plantTasks.any((task) => task.isOverdue),
+            allCares: plantTasks.map((task) => task.care).toList(),
+          ));
+        }
+      });
+    });
+
+    // 转换为有序列表，只取有任务的日期
+    List<CareScheduleDay> result = [];
+    List<String> sortedDates = groupedSchedule.keys.toList()..sort();
+    
+    int daysAdded = 0;
+    for (String dateKey in sortedDates) {
+      if (daysAdded >= maxDays) break;
+      
+      DateTime date = DateTime.parse(dateKey);
+      if (date.isAfter(startDate.subtract(Duration(days: 1)))) {
+        result.add(CareScheduleDay(
+          date: date,
+          tasks: groupedSchedule[dateKey]!,
+        ));
+        daysAdded++;
+      }
+    }
+
+    return result;
+  }
+
+  String _formatDate(DateTime date) {
+    DateTime today = DateTime.now();
+    DateTime tomorrow = today.add(Duration(days: 1));
+    
+    if (date.year == today.year && 
+        date.month == today.month && 
+        date.day == today.day) {
+      return AppLocalizations.of(context)!.buttonToday;
+    } else if (date.year == tomorrow.year && 
+               date.month == tomorrow.month && 
+               date.day == tomorrow.day) {
+      return "明天";
+    } else {
+      String weekday = DateFormat.EEEE(Localizations.localeOf(context).languageCode).format(date);
+      String dateStr = DateFormat('M月d日').format(date);
+      return '$dateStr $weekday';
+    }
+  }
+
+  void _onPlantTap(Plant plant) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CarePlantScreen(title: plant.name),
+        settings: RouteSettings(arguments: plant),
+      ),
+    );
+    // 从详情页返回时重新加载数据
+    _loadCareSchedule();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 70,
+        title: FittedBox(
+          fit: BoxFit.fitWidth,
+          child: Text('养护计划'),
+        ),
+        titleTextStyle: Theme.of(context).textTheme.displayLarge,
+        backgroundColor: Colors.transparent,
+        elevation: 0.0,
+      ),
+      body: _careSchedule.isEmpty && !_isLoading
+          ? _buildEmptyState()
+          : ListView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(16.0),
+              itemCount: _careSchedule.length + (_isLoading ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == _careSchedule.length) {
+                  return _buildLoadingIndicator();
+                }
+                return _buildDayCard(_careSchedule[index]);
+              },
+            ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.event_available,
+            size: 80,
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '暂无养护计划',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '您的植物目前都不需要养护',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      alignment: Alignment.center,
+      child: const CircularProgressIndicator(),
+    );
+  }
+
+  Widget _buildDayCard(CareScheduleDay day) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16.0),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+            ),
+            child: Text(
+              _formatDate(day.date),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ),
+          ...day.tasks.map((task) => _buildTaskItem(task)).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTaskItem(PlantCareTask task) {
+    return InkWell(
+      onTap: () => _onPlantTap(task.plant),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: Theme.of(context).dividerColor.withOpacity(0.3),
+              width: 0.5,
+            ),
+          ),
+        ),
+        child: Row(
+          children: [
+            // 植物缩略图
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: SizedBox(
+                width: 50,
+                height: 50,
+                child: task.plant.picture != null && task.plant.picture!.isNotEmpty
+                    ? (task.plant.picture!.contains("florae_avatar")
+                        ? Image.asset(
+                            task.plant.picture!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: Colors.grey[300],
+                                child: Icon(Icons.local_florist, color: Colors.grey[600]),
+                              );
+                            },
+                          )
+                        : Image.file(
+                            File(task.plant.picture!),
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: Colors.grey[300],
+                                child: Icon(Icons.local_florist, color: Colors.grey[600]),
+                              );
+                            },
+                          ))
+                    : Container(
+                        color: Colors.grey[300],
+                        child: Icon(Icons.local_florist, color: Colors.grey[600]),
+                      ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            // 植物名称
+            Expanded(
+              child: Text(
+                task.plant.name,
+                style: Theme.of(context).textTheme.titleMedium,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 8),
+            // 养护任务图标们
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: _buildCareIcons(task),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildCareIcons(PlantCareTask task) {
+    List<Care> cares = task.allCares ?? [task.care];
+    List<Widget> icons = [];
+    
+    for (int i = 0; i < cares.length && i < 4; i++) {
+      Care care = cares[i];
+      icons.add(
+        Padding(
+          padding: EdgeInsets.only(left: i > 0 ? 4.0 : 0),
+          child: Icon(
+            DefaultValues.getCare(context, care.name)?.icon ?? Icons.help,
+            color: task.isOverdue 
+                ? Colors.red 
+                : DefaultValues.getCare(context, care.name)?.color,
+            size: 20,
+          ),
+        ),
+      );
+    }
+    
+    // 如果有更多任务，显示省略号
+    if (cares.length > 4) {
+      icons.add(
+        Padding(
+          padding: const EdgeInsets.only(left: 4.0),
+          child: Text(
+            '...',
+            style: TextStyle(
+              color: task.isOverdue ? Colors.red : Colors.grey,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      );
+    }
+    
+    return icons;
+  }
+}
+
+// 数据模型类
+class CareScheduleDay {
+  final DateTime date;
+  final List<PlantCareTask> tasks;
+
+  CareScheduleDay({
+    required this.date,
+    required this.tasks,
+  });
+}
+
+class PlantCareTask {
+  final Plant plant;
+  final Care care;
+  final bool isOverdue;
+  final List<Care>? allCares;
+
+  PlantCareTask({
+    required this.plant,
+    required this.care,
+    required this.isOverdue,
+    this.allCares,
+  });
+}

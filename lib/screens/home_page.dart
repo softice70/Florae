@@ -17,6 +17,7 @@ import '../data/default.dart';
 import '../l10n/app_localizations.dart';
 import '../main.dart';
 import 'care_plant.dart';
+import 'care_calendar_simple.dart';
 import 'manage_plant.dart';
 import 'settings.dart';
 
@@ -212,25 +213,21 @@ class _MyHomePageState extends State<MyHomePage> {
               : const SizedBox.shrink(),
           _currentPage == Page.today
               ? IconButton(
-                  icon: const Icon(Icons.calendar_today),
+                  icon: const Icon(Icons.event_note),
                   iconSize: 25,
                   color: Theme.of(context).colorScheme.primary,
-                  tooltip: AppLocalizations.of(context)!.tooltipShowCalendar,
+                  tooltip: "养护计划",
                   onPressed: () async {
-                    DateTime? result = await showDatePicker(
-                        context: context,
-                        initialDate:
-                            DateTime.now().add(const Duration(days: 1)),
-                        firstDate: DateTime.now().add(const Duration(days: 1)),
-                        lastDate: DateTime.now().add(const Duration(days: 7)));
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (context) => const CareCalendarScreen(
+                          title: "养护计划",
+                        ),
+                      ),
+                    );
                     setState(() {
-                      if (result != null) {
-                        var time = TimeOfDay.now();
-                        _dateFilter = result.add(
-                            Duration(hours: time.hour, minutes: time.minute));
-                        _dateFilterEnabled = true;
-                        _loadPlants();
-                      }
+                      _loadPlants();
                     });
                   },
                 )
