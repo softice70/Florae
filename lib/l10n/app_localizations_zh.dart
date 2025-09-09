@@ -187,6 +187,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get importData => 'Import garden';
 
   @override
+  String get careSuccess => '养护记录成功';
+
+  @override
   String get unsuccessfullyRestore => 'Unable to restore the backup.';
 
   @override

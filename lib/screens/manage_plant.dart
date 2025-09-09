@@ -351,6 +351,28 @@ class _ManagePlantScreen extends State<ManagePlantScreen> {
                   },
                 ),
               ),
+              // 编辑现有植物时显示删除按钮
+              if (widget.plant != null) ...[
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      await _showDeletePlantDialog(widget.plant!);
+                    },
+                    icon: const Icon(Icons.delete),
+                    label: Text(AppLocalizations.of(context)!.deleteButton),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 70),
             ],
           ),
@@ -384,7 +406,8 @@ class _ManagePlantScreen extends State<ManagePlantScreen> {
                     ? fileName
                     : "assets/florae_avatar_$_prefNumber.png",
                 location: locationController.text,
-                cares: []);
+                cares: [],
+                careHistory: widget.plant != null ? widget.plant!.careHistory : []);
 
             // Assign cares to plant
             newPlant.cares.clear();
@@ -418,5 +441,39 @@ class _ManagePlantScreen extends State<ManagePlantScreen> {
   }
 
   bool _plantExist(String name) => _plants.contains((plant) => plant.name == name);
+
+  Future<void> _showDeletePlantDialog(Plant plant) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(AppLocalizations.of(context)!.deletePlantTitle),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(AppLocalizations.of(context)!.deletePlantBody),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(AppLocalizations.of(context)!.no),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text(AppLocalizations.of(context)!.yes),
+              onPressed: () async {
+                await garden.deletePlant(plant);
+                Navigator.popUntil(context, ModalRoute.withName('/'));
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
 }

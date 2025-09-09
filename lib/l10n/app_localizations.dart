@@ -467,6 +467,12 @@ abstract class AppLocalizations {
   /// **'Import garden'**
   String get importData;
 
+  /// No description provided for @careSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Care recorded successfully'**
+  String get careSuccess;
+
   /// No description provided for @unsuccessfullyRestore.
   ///
   /// In en, this message translates to:

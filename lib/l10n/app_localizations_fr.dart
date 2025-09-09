@@ -187,6 +187,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get importData => 'Importer des données';
 
   @override
+  String get careSuccess => 'Care recorded successfully';
+
+  @override
   String get unsuccessfullyRestore => 'Impossible de restaurer la sauvegarde.';
 
   @override

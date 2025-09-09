@@ -134,15 +134,26 @@ class _CareCalendarScreenState extends State<CareCalendarScreen> {
           print('完整版 使用历史记录日期: $lastCareDate');
         }
 
-        // 计算下次待执行日期
-        DateTime nextCareDate = lastCareDate.add(Duration(days: care.cycles));
+        // 智能计算下次待执行日期
+        DateTime nextCareDate = lastCareDate;
         bool isOverdue = false;
         
-        // 如果已经逾期，设为今天
-        if (nextCareDate.isBefore(currentDate)) {
+        // 计算从最后执行日期到现在应该执行的次数
+        int daysSinceLastCare = currentDate.difference(lastCareDate).inDays;
+        
+        if (daysSinceLastCare >= care.cycles) {
+          // 已经逾期，计算逾期了多少个周期
+          int overdueCycles = (daysSinceLastCare / care.cycles).floor();
+          
+          // 下次执行日期应该是当前日期（逾期任务）
           nextCareDate = currentDate;
           isOverdue = true;
-          print('完整版 已逾期，设为今日');
+          
+          print('完整版 已逾期 $overdueCycles 个周期，设为今日');
+        } else {
+          // 还未逾期，按正常周期计算
+          nextCareDate = lastCareDate.add(Duration(days: care.cycles));
+          print('完整版 正常计算，下次执行日期: $nextCareDate');
         }
 
         print('完整版 计算结果: 下次${care.name}日期: $nextCareDate');

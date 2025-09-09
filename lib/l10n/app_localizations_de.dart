@@ -187,6 +187,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get importData => 'Garten importieren';
 
   @override
+  String get careSuccess => 'Care recorded successfully';
+
+  @override
   String get unsuccessfullyRestore => 'Die Sicherung konnte nicht wiederhergestellt werden.';
 
   @override

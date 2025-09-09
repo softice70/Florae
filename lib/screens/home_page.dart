@@ -211,27 +211,25 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                 )
               : const SizedBox.shrink(),
-          _currentPage == Page.today
-              ? IconButton(
-                  icon: const Icon(Icons.event_note),
-                  iconSize: 25,
-                  color: Theme.of(context).colorScheme.primary,
-                  tooltip: "养护计划",
-                  onPressed: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute<void>(
-                        builder: (context) => const CareCalendarScreen(
-                          title: "养护计划",
-                        ),
-                      ),
-                    );
-                    setState(() {
-                      _loadPlants();
-                    });
-                  },
-                )
-              : const SizedBox.shrink(),
+          IconButton(
+            icon: const Icon(Icons.event_note),
+            iconSize: 25,
+            color: Theme.of(context).colorScheme.primary,
+            tooltip: "养护计划",
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (context) => const CareCalendarScreen(
+                    title: "养护计划",
+                  ),
+                ),
+              );
+              setState(() {
+                _loadPlants();
+              });
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.settings),
             iconSize: 25,
@@ -319,37 +317,81 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  _loadPlants() async {
+  void _loadPlants({DateTime? dateCheck}) async {
     List<Plant> plants = [];
     Map<String, List<String>> cares = {};
 
     List<Plant> allPlants = await garden.getAllPlants();
-    DateTime dateCheck = _dateFilterEnabled ? _dateFilter : DateTime.now();
-
-    bool plantAlreadyInserted = false;
+    DateTime checkDate = dateCheck ?? DateTime.now();
+    DateTime currentDate = DateTime(checkDate.year, checkDate.month, checkDate.day);
 
     if (_currentPage == Page.today) {
-      for (Plant p in allPlants) {
-        cares[p.name] = [];
-        for (Care c in p.cares) {
-          if (c.isRequired(dateCheck, _dateFilterEnabled)) {
-            if (!plantAlreadyInserted) {
-              plants.add(p);
-              plantAlreadyInserted = true;
+      for (Plant plant in allPlants) {
+        cares[plant.name] = [];
+        bool hasTodayTask = false;
+        
+        // 检查每种养护类型
+        for (Care care in plant.cares) {
+          if (care.cycles <= 0 || care.effected == null) continue;
+          
+          // 计算下次应该执行的日期
+          DateTime lastCareDate = DateTime(
+            care.effected!.year,
+            care.effected!.month,
+            care.effected!.day,
+          );
+          
+          // 找到这个养护类型的最后一次执行日期
+          DateTime? lastSpecificCareDate;
+          for (var history in plant.careHistory.reversed) {
+            if (history.careName == care.name) {
+              lastSpecificCareDate = history.careDate;
+              break;
             }
-            cares[p.name]!.add(c.name);
+          }
+          
+          // 使用更精确的最后一次执行日期
+          if (lastSpecificCareDate != null) {
+            lastCareDate = DateTime(
+              lastSpecificCareDate.year,
+              lastSpecificCareDate.month,
+              lastSpecificCareDate.day,
+            );
+          }
+          
+          // 智能计算下次待执行日期
+          int daysSinceLastCare = currentDate.difference(lastCareDate).inDays;
+          
+          if (daysSinceLastCare >= care.cycles) {
+            // 已经逾期，应该今天执行
+            hasTodayTask = true;
+            cares[plant.name]!.add(care.name);
+          } else {
+            // 计算正常下次执行日期
+            DateTime nextCareDate = lastCareDate.add(Duration(days: care.cycles));
+            DateTime nextDate = DateTime(nextCareDate.year, nextCareDate.month, nextCareDate.day);
+            DateTime checkDay = DateTime(currentDate.year, currentDate.month, currentDate.day);
+            
+            if (nextDate == checkDay) {
+              hasTodayTask = true;
+              cares[plant.name]!.add(care.name);
+            }
           }
         }
-        plantAlreadyInserted = false;
+        
+        // 如果有需要养护的任务，添加植物
+        if (cares[plant.name]!.isNotEmpty) {
+          plants.add(plant);
+        }
       }
     } else {
       plants = allPlants;
-      // Alphabetically sort
+      // 按字母排序
       plants.sort((a, b) => a.name.compareTo(b.name));
-      for (Plant p in allPlants) {
-        cares[p.name] = [];
-        for (Care c in p.cares) {
-          cares[p.name]!.add(c.name);
+      for (Plant plant in allPlants) {
+        cares[plant.name] = [];
+        for (Care care in plant.cares) {
+          cares[plant.name]!.add(care.name);
         }
       }
     }

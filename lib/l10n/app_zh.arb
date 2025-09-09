@@ -57,6 +57,7 @@
   "careNotificationDescription": "接收植物养护提醒",
   "deletePlantTitle": "删除植物",
   "deletePlantBody": "您将彻底删除此植物，此操作无法撤销。",
+  "careSuccess": "养护记录成功",
   "@helloWorld": {
     "description": "传统的新生儿程序员问候语"
   }
