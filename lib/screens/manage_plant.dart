@@ -335,7 +335,6 @@ class _ManagePlantScreen extends State<ManagePlantScreen> {
                 child: ListTile(
                   trailing: const Icon(Icons.arrow_right),
                   leading: const Icon(Icons.cake),
-                  enabled: !widget.update,
                   title: Text(AppLocalizations.of(context)!.labelDayPlanted),
                   subtitle: Text(DateFormat.yMMMMEEEEd(
                           Localizations.localeOf(context).languageCode)
@@ -343,11 +342,11 @@ class _ManagePlantScreen extends State<ManagePlantScreen> {
                   onTap: () async {
                     DateTime? result = await showDatePicker(
                         context: context,
-                        initialDate: DateTime.now(),
+                        initialDate: _planted,
                         firstDate: DateTime(1901, 1, 1),
                         lastDate: DateTime.now());
                     setState(() {
-                      _planted = result ?? DateTime.now();
+                      _planted = result ?? _planted;
                     });
                   },
                 ),
