@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'care.dart';
+import 'care_history.dart';
 
 part 'plant.g.dart';
 
@@ -12,6 +13,7 @@ class Plant {
   DateTime createdAt;
   String? picture;
   List<Care> cares = [];
+  List<CareHistory> careHistory = [];
 
   Plant(
       {required this.name,
@@ -20,7 +22,8 @@ class Plant {
       this.description = "",
       required this.createdAt,
       this.picture,
-      required this.cares});
+      required this.cares,
+      List<CareHistory>? careHistory}) : careHistory = careHistory ?? [];
 
   factory Plant.fromJson(Map<String, dynamic> json) => _$PlantFromJson(json);
 

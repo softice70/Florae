@@ -16,6 +16,9 @@ Plant _$PlantFromJson(Map<String, dynamic> json) => Plant(
       cares: (json['cares'] as List<dynamic>)
           .map((e) => Care.fromJson(e as Map<String, dynamic>))
           .toList(),
+      careHistory: (json['careHistory'] as List<dynamic>?)
+          ?.map((e) => CareHistory.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$PlantToJson(Plant instance) => <String, dynamic>{
@@ -26,4 +29,5 @@ Map<String, dynamic> _$PlantToJson(Plant instance) => <String, dynamic>{
       'createdAt': instance.createdAt.toIso8601String(),
       'picture': instance.picture,
       'cares': instance.cares.map((e) => e.toJson()).toList(),
+      'careHistory': instance.careHistory.map((e) => e.toJson()).toList(),
     };

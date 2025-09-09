@@ -13,6 +13,7 @@ Care _$CareFromJson(Map<String, dynamic> json) => Care(
           ? null
           : DateTime.parse(json['effected'] as String),
       id: (json['id'] as num).toInt(),
+      details: json['details'] as String?,
     );
 
 Map<String, dynamic> _$CareToJson(Care instance) => <String, dynamic>{
@@ -20,4 +21,5 @@ Map<String, dynamic> _$CareToJson(Care instance) => <String, dynamic>{
       'name': instance.name,
       'cycles': instance.cycles,
       'effected': instance.effected?.toIso8601String(),
+      'details': instance.details,
     };

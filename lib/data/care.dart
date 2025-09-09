@@ -8,12 +8,14 @@ class Care {
   String name;
   int cycles = 0;
   DateTime? effected;
+  String? details; // 养护详情
 
   Care(
       {required this.name,
       required this.cycles,
       required this.effected,
-      required this.id});
+      required this.id,
+      this.details});
 
   factory Care.fromJson(Map<String, dynamic> json) => _$CareFromJson(json);
 
