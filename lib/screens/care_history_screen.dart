@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:florae/data/care_history.dart';
 import 'package:florae/data/plant.dart';
 import 'package:florae/data/garden.dart';
+import 'package:florae/data/default.dart';
 import 'package:florae/l10n/app_localizations.dart';
 import 'package:florae/screens/care_plant.dart';
 import 'package:flutter/material.dart';
@@ -248,7 +249,7 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           // 养护类型图标
                           Container(
@@ -259,30 +260,33 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
                           ),
                           // 养护详情
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                RichText(
-                                  text: TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: '${_getCareChineseName(history.careName)}: ',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium
-                                            ?.copyWith(fontWeight: FontWeight.w500),
-                                      ),
-                                      TextSpan(
-                                        text: history.details ?? '',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium,
-                                      ),
-                                    ],
+                            child: history.details != null && history.details!.isNotEmpty
+                                ? RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: _getCareChineseName(history.careName),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(fontWeight: FontWeight.w500),
+                                        ),
+                                        TextSpan(
+                                          text: ' ${history.details}',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium,
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : Text(
+                                    _getCareChineseName(history.careName),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(fontWeight: FontWeight.w500),
                                   ),
-                                ),
-                              ],
-                            ),
                           ),
                         ],
                       ),
@@ -319,51 +323,11 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
   }
 
   Widget _getCareIcon(String careName) {
-    IconData iconData;
-    Color color = Colors.blue;
+    final careInfo = DefaultValues.getCare(context, careName);
+    final icon = careInfo?.icon ?? Icons.help_outline;
+    final color = careInfo?.color ?? Colors.grey;
     
-    switch (careName.toLowerCase()) {
-      case 'water':
-      case '浇水':
-        iconData = Icons.water_drop;
-        color = Colors.blue;
-        break;
-      case 'spray':
-      case '喷雾':
-        iconData = Icons.water;
-        color = Colors.lightBlue;
-        break;
-      case 'rotate':
-      case '转动':
-        iconData = Icons.rotate_90_degrees_ccw;
-        color = Colors.green;
-        break;
-      case 'prune':
-      case '修剪':
-        iconData = Icons.content_cut;
-        color = Colors.orange;
-        break;
-      case 'fertilise':
-      case '施肥':
-        iconData = Icons.grass;
-        color = Colors.brown;
-        break;
-      case 'transplant':
-      case '移栽':
-        iconData = Icons.transfer_within_a_station;
-        color = Colors.purple;
-        break;
-      case 'clean':
-      case '清洁':
-        iconData = Icons.cleaning_services;
-        color = Colors.teal;
-        break;
-      default:
-        iconData = Icons.favorite;
-        color = Colors.pink;
-    }
-    
-    return Icon(iconData, color: color, size: 20);
+    return Icon(icon, color: color, size: 20);
   }
 
   Widget _buildLoadingIndicator() {

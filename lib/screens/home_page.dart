@@ -36,7 +36,7 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Plant> _plants = [];
   Map<String, List<String>> _cares = {};
   bool _dateFilterEnabled = false;
-  DateTime _dateFilter = DateTime.now();
+  DateTime _dateFilter = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   Page _currentPage = Page.today;
 
   @override
@@ -366,7 +366,7 @@ class _MyHomePageState extends State<MyHomePage> {
           // 智能计算下次待执行日期
           int daysSinceLastCare = currentDate.difference(lastCareDate).inDays;
           
-          if (daysSinceLastCare >= care.cycles) {
+          if (daysSinceLastCare > care.cycles) {
             // 已经逾期，应该今天执行
             hasTodayTask = true;
             cares[plant.name]!.add(care.name);
@@ -411,8 +411,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
     for (Plant p in allPlants) {
       for (Care c in p.cares) {
-        if (c.isRequired(DateTime.now(), false)) {
-          c.effected = DateTime.now();
+        final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+        if (c.isRequired(today, false)) {
+          c.effected = today;
         }
       }
       await garden.updatePlant(p);
@@ -445,9 +446,52 @@ class _MyHomePageState extends State<MyHomePage> {
     List<Icon> list = [];
 
     for (var care in _cares[plant.name]!) {
+      // 检查该养护任务是否逾期
+      bool isOverdue = false;
+      
+      for (Care careInfo in plant.cares) {
+        if (careInfo.name == care) {
+          if (careInfo.cycles <= 0 || careInfo.effected == null) continue;
+          
+          // 计算下次应该执行的日期
+          DateTime lastCareDate = DateTime(
+            careInfo.effected!.year,
+            careInfo.effected!.month,
+            careInfo.effected!.day,
+          );
+          
+          // 找到这个养护类型的最后一次执行日期
+          DateTime? lastSpecificCareDate;
+          for (var history in plant.careHistory.reversed) {
+            if (history.careName == care) {
+              lastSpecificCareDate = history.careDate;
+              break;
+            }
+          }
+          
+          // 使用更精确的最后一次执行日期
+          if (lastSpecificCareDate != null) {
+            lastCareDate = DateTime(
+              lastSpecificCareDate.year,
+              lastSpecificCareDate.month,
+              lastSpecificCareDate.day,
+            );
+          }
+          
+          // 判断是否逾期
+          DateTime currentDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+          int daysSinceLastCare = currentDate.difference(lastCareDate).inDays;
+          
+          if (daysSinceLastCare > careInfo.cycles) {
+            isOverdue = true;
+          }
+          break;
+        }
+      }
+
       list.add(
         Icon(DefaultValues.getCare(context, care)!.icon,
-            color: DefaultValues.getCare(context, care)!.color),
+            color: isOverdue ? Colors.red : DefaultValues.getCare(context, care)!.color),
       );
     }
 

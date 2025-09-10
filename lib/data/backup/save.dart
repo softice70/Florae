@@ -7,7 +7,7 @@ part 'save.g.dart';
 @JsonSerializable(explicitToJson: true)
 class Save {
   int version = 1;
-  DateTime createdAt = DateTime.now();
+  DateTime createdAt = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   List<Binary> binaries = [];
   List<Plant> garden = [];
 

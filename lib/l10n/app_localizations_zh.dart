@@ -127,7 +127,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get daysLeft => '天到期';
 
   @override
-  String get daysLate => '从';
+  String get daysLate => '已经逾期';
 
   @override
   String get tooltipEdit => '编辑此植物';

@@ -22,8 +22,8 @@ class Care {
   Map<String, dynamic> toJson() => _$CareToJson(this);
 
   int _daysBetween(DateTime date1, DateTime date2) {
-    DateTime d1 = DateTime.utc(date1.year, date1.month, date1.day);
-    DateTime d2 = DateTime.utc(date2.year, date2.month, date2.day);
+    DateTime d1 = DateTime(date1.year, date1.month, date1.day);
+    DateTime d2 = DateTime(date2.year, date2.month, date2.day);
     return (d1.difference(d2).inDays).abs();
   }
 
@@ -41,7 +41,7 @@ class Care {
     }
       // Else, add all unattended care, current and past
     else {
-      return daysSinceLastCare != 0 && daysSinceLastCare >= cycles;
+      return daysSinceLastCare != 0 && daysSinceLastCare > cycles;
     }
   }
 }

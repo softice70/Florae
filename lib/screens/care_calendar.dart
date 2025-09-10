@@ -141,7 +141,7 @@ class _CareCalendarScreenState extends State<CareCalendarScreen> {
         // 计算从最后执行日期到现在应该执行的次数
         int daysSinceLastCare = currentDate.difference(lastCareDate).inDays;
         
-        if (daysSinceLastCare >= care.cycles) {
+        if (daysSinceLastCare > care.cycles) {
           // 已经逾期，计算逾期了多少个周期
           int overdueCycles = (daysSinceLastCare / care.cycles).floor();
           
@@ -401,15 +401,63 @@ Widget _buildTaskItem(PlantCareTask task) {
     
     for (int i = 0; i < cares.length && i < 4; i++) {
       Care care = cares[i];
+       
+      // 计算逾期天数 - 确保只精确到天级别
+      int overdueDays = 0;
+      if (task.isOverdue) {
+        DateTime today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+        DateTime lastCareDate = DateTime(
+          care.effected!.year,
+          care.effected!.month,
+          care.effected!.day,
+        );
+        
+        // 找到这个养护类型的最后一次执行日期
+        DateTime? lastSpecificCareDate;
+        for (var history in task.plant.careHistory.reversed) {
+          if (history.careName == care.name) {
+            lastSpecificCareDate = history.careDate;
+            break;
+          }
+        }
+        
+        // 使用更精确的最后一次执行日期 - 确保只精确到天级别
+        if (lastSpecificCareDate != null) {
+          lastCareDate = DateTime(
+            lastSpecificCareDate.year,
+            lastSpecificCareDate.month,
+            lastSpecificCareDate.day,
+          );
+        }
+        
+        DateTime expectedDate = lastCareDate.add(Duration(days: care.cycles));
+        overdueDays = today.difference(expectedDate).inDays;
+      }
+      
       icons.add(
         Padding(
           padding: EdgeInsets.only(left: i > 0 ? 4.0 : 0),
-          child: Icon(
-            DefaultValues.getCare(context, care.name)?.icon ?? Icons.help,
-            color: task.isOverdue 
-                ? Colors.red 
-                : DefaultValues.getCare(context, care.name)?.color,
-            size: 20,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                DefaultValues.getCare(context, care.name)?.icon ?? Icons.help,
+                color: task.isOverdue 
+                    ? Colors.red 
+                    : DefaultValues.getCare(context, care.name)?.color,
+                size: 20,
+              ),
+              if (task.isOverdue && overdueDays > 0) ...[
+                Text(
+                  '$overdueDays天',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
       );

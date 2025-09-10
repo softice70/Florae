@@ -31,7 +31,7 @@ class ManagePlantScreen extends StatefulWidget {
 class _ManagePlantScreen extends State<ManagePlantScreen> {
   Map<String, Care> cares = {};
 
-  DateTime _planted = DateTime.now();
+  DateTime _planted = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
   List<Plant> _plants = [];
 
@@ -149,7 +149,7 @@ class _ManagePlantScreen extends State<ManagePlantScreen> {
       if (cares[key] == null) {
         cares[key] = Care(
             cycles: value.defaultCycles,
-            effected: DateTime.now(),
+            effected: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day),
             name: key,
             id: key.hashCode);
       }
@@ -344,7 +344,7 @@ class _ManagePlantScreen extends State<ManagePlantScreen> {
                         context: context,
                         initialDate: _planted,
                         firstDate: DateTime(1901, 1, 1),
-                        lastDate: DateTime.now());
+                        lastDate: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day));
                     setState(() {
                       _planted = result ?? _planted;
                     });

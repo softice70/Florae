@@ -40,7 +40,7 @@
   "clean": "清理",
   "now": "现在",
   "daysLeft": "天到期",
-  "daysLate": "从",
+  "daysLate": "已经逾期",
   "tooltipEdit": "编辑此植物",
   "deleteButton": "删除",
   "noCaresError": "请至少选择一种养护项目",

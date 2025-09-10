@@ -68,7 +68,7 @@ class _CareCalendarScreenState extends State<CareCalendarScreen> {
         
         if (care.cycles <= 0 || care.effected == null) continue;
 
-        // 计算下次应该执行的日期
+        // 计算下次应该执行的日期 - 确保只精确到天级别
         DateTime lastCareDate = DateTime(
           care.effected!.year,
           care.effected!.month,
@@ -84,7 +84,7 @@ class _CareCalendarScreenState extends State<CareCalendarScreen> {
           }
         }
         
-        // 使用更精确的最后一次执行日期
+        // 使用更精确的最后一次执行日期 - 确保只精确到天级别
         if (lastSpecificCareDate != null) {
           lastCareDate = DateTime(
             lastSpecificCareDate.year,
@@ -98,10 +98,10 @@ class _CareCalendarScreenState extends State<CareCalendarScreen> {
         DateTime nextCareDate = lastCareDate;
         bool isOverdue = false;
         
-        // 计算从最后执行日期到现在应该执行的次数
+        // 计算从最后执行日期到现在应该执行的次数 - 确保只精确到天级别
         int daysSinceLastCare = currentDate.difference(lastCareDate).inDays;
         
-        if (daysSinceLastCare >= care.cycles) {
+        if (daysSinceLastCare > care.cycles) {
           // 已经逾期，计算逾期了多少个周期
           int overdueCycles = (daysSinceLastCare / care.cycles).floor();
           
@@ -274,6 +274,38 @@ class _CareCalendarScreenState extends State<CareCalendarScreen> {
   }
 
   Widget _buildTaskItem(PlantCareTask task) {
+    // 计算逾期天数 - 确保只精确到天级别
+    int overdueDays = 0;
+    if (task.isOverdue) {
+      DateTime today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      DateTime lastCareDate = DateTime(
+        task.care.effected!.year,
+        task.care.effected!.month,
+        task.care.effected!.day,
+      );
+      
+      // 找到这个养护类型的最后一次执行日期
+      DateTime? lastSpecificCareDate;
+      for (var history in task.plant.careHistory.reversed) {
+        if (history.careName == task.care.name) {
+          lastSpecificCareDate = history.careDate;
+          break;
+        }
+      }
+      
+      // 使用更精确的最后一次执行日期 - 确保只精确到天级别
+      if (lastSpecificCareDate != null) {
+        lastCareDate = DateTime(
+          lastSpecificCareDate.year,
+          lastSpecificCareDate.month,
+          lastSpecificCareDate.day,
+        );
+      }
+      
+      DateTime expectedDate = lastCareDate.add(Duration(days: task.care.cycles));
+      overdueDays = today.difference(expectedDate).inDays;
+    }
+    
     return InkWell(
       onTap: () => _onPlantTap(task.plant),
       child: Container(
@@ -315,8 +347,19 @@ class _CareCalendarScreenState extends State<CareCalendarScreen> {
                     DefaultValues.getCare(context, task.care.name)?.translatedName ?? task.care.name,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: task.isOverdue ? Colors.red : Colors.grey[600],
+                      fontWeight: task.isOverdue ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
+                  if (task.isOverdue && overdueDays > 0) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      '已逾期$overdueDays天',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

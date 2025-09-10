@@ -25,7 +25,7 @@ class _CarePlantScreen extends State<CarePlantScreen> {
   int periodicityInHours = 1;
   Map<Care, bool?> careCheck = {};
   Map<Care, TextEditingController> careDetailsControllers = {};
-  DateTime selectedCareDate = DateTime.now();
+  DateTime selectedCareDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
   @override
   void initState() {
@@ -55,10 +55,11 @@ class _CarePlantScreen extends State<CarePlantScreen> {
     List<Widget> careWidgets = [];
 
     for (Care care in plant.cares) {
-      int daysToCare = care.cycles - care.daysSinceLastCare(DateTime.now());
+      final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      int daysToCare = care.cycles - care.daysSinceLastCare(today);
 
       if (careCheck[care] == null) {
-        careCheck[care] = daysToCare <= 0;
+        careCheck[care] = false;
       }
 
       // 为每个养护任务创建文本控制器
@@ -66,7 +67,7 @@ class _CarePlantScreen extends State<CarePlantScreen> {
         careDetailsControllers[care] = TextEditingController();
 
         // 查找今天已有的养护记录
-        final today = DateTime.now();
+        final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
         final todayRecord = plant.careHistory.firstWhere(
           (history) =>
               history.careName == care.name &&
@@ -94,7 +95,7 @@ class _CarePlantScreen extends State<CarePlantScreen> {
 
               // 当checkbox状态改变时，查找今天的记录
               if (value == true) {
-                final today = DateTime.now();
+                final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
                 final todayRecord = plant.careHistory.firstWhere(
                   (history) =>
                       history.careName == care.name &&
@@ -167,8 +168,8 @@ class _CarePlantScreen extends State<CarePlantScreen> {
                       initialDate: selectedCareDate,
                       firstDate: previousRecordDate
                               ?.add(const Duration(days: 1)) ??
-                          DateTime.now().subtract(const Duration(days: 365)),
-                      lastDate: DateTime.now(),
+                          DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day).subtract(const Duration(days: 365)),
+                      lastDate: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day),
                       locale: Localizations.localeOf(context),
                     );
                     if (picked != null) {
@@ -190,9 +191,18 @@ class _CarePlantScreen extends State<CarePlantScreen> {
                 TextButton(
                   onPressed: () {
                     setState(() {
-                      careCheck.clear();
-                      careDetailsControllers.clear();
-                      selectedCareDate = DateTime.now(); // 重置日期
+                      // 重置所有复选框为未选中状态
+                      for (var care in plant.cares) {
+                        careCheck[care] = false;
+                      }
+                      
+                      // 清空所有文本控制器的文本内容
+                      for (var controller in careDetailsControllers.values) {
+                        controller.clear();
+                      }
+                      
+                      // 重置日期为今天
+                      selectedCareDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
                     });
                   },
                   child: Text('取消'),
@@ -216,7 +226,7 @@ class _CarePlantScreen extends State<CarePlantScreen> {
                         var careIndex = plant.cares
                             .indexWhere((element) => element.name == key.name);
                         if (careIndex != -1) {
-                          plant.cares[careIndex].effected = selectedCareDate;
+                          plant.cares[careIndex].effected = selectedDateStart; // 确保只精确到天级别
 
                           // 获取养护详情
                           String? details =
@@ -233,7 +243,7 @@ class _CarePlantScreen extends State<CarePlantScreen> {
 
                           // 添加新的养护记录
                           plant.careHistory.add(CareHistory(
-                            careDate: selectedCareDate,
+                            careDate: selectedDateStart, // 确保只精确到天级别
                             careName: key.name,
                             details: details,
                           ));
@@ -245,9 +255,18 @@ class _CarePlantScreen extends State<CarePlantScreen> {
 
                     // 重置养护卡片状态
                     setState(() {
-                      careCheck.clear();
-                      careDetailsControllers.clear();
-                      selectedCareDate = DateTime.now(); // 重置日期
+                      // 重置所有复选框为未选中状态
+                      for (var care in plant.cares) {
+                        careCheck[care] = false;
+                      }
+                      
+                      // 清空所有文本控制器的文本内容
+                      for (var controller in careDetailsControllers.values) {
+                        controller.clear();
+                      }
+                      
+                      // 重置日期为今天
+                      selectedCareDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
                     });
 
                     // 显示成功提示
@@ -354,7 +373,7 @@ class _CarePlantScreen extends State<CarePlantScreen> {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         SizedBox(
                           width: 40, // 日期列宽度 - 适中宽度
@@ -395,7 +414,7 @@ class _CarePlantScreen extends State<CarePlantScreen> {
                                     const SizedBox(width: 4),
                                     Expanded(
                                       child: Text(
-                                        '${DefaultValues.getCare(context, history.careName)?.translatedName ?? history.careName}${history.details?.isNotEmpty == true ? ': ${history.details}' : ''}',
+                                        '${DefaultValues.getCare(context, history.careName)?.translatedName ?? history.careName}${history.details?.isNotEmpty == true ? ' ${history.details}' : ''}',
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodySmall,

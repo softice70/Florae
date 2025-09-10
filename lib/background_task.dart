@@ -35,7 +35,8 @@ Future<void> checkCaresAndNotify() async {
     for (Plant plant in allPlants) {
       for (Care care in plant.cares) {
         // Report all unattended care, current and past
-        if (care.isRequired(DateTime.now(), false)) {
+        final today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+        if (care.isRequired(today, false)) {
           plants.add(plant.name);
           break;
         }
