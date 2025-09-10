@@ -25,6 +25,7 @@ class _CarePlantScreen extends State<CarePlantScreen> {
   int periodicityInHours = 1;
   Map<Care, bool?> careCheck = {};
   Map<Care, TextEditingController> careDetailsControllers = {};
+  DateTime selectedCareDate = DateTime.now();
 
   @override
   void initState() {
@@ -139,93 +140,132 @@ class _CarePlantScreen extends State<CarePlantScreen> {
       }
     }
 
-    // 如果有选中的养护任务，显示取消和保存按钮
-    final hasSelectedCares =
-        careCheck.values.any((selected) => selected == true);
-    if (hasSelectedCares) {
-      careWidgets.add(
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    careCheck.clear();
-                    careDetailsControllers.clear();
-                  });
-                },
-                child: Text('取消'),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () async {
-                  if (!careCheck.containsValue(true)) {
+    // 如果有选中的养护任务，显示日期选择、取消和保存按钮
+      final hasSelectedCares =
+          careCheck.values.any((selected) => selected == true);
+      if (hasSelectedCares) {
+        careWidgets.add(
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                // 日期选择按钮
+                TextButton.icon(
+                  onPressed: () async {
+                    // 获取上一条养护记录的日期（如果有的话）
+                    DateTime? previousRecordDate;
+                    final sortedHistory = List<CareHistory>.from(plant.careHistory)
+                      ..sort((a, b) => b.careDate.compareTo(a.careDate));
+
+                    if (sortedHistory.isNotEmpty) {
+                      previousRecordDate = sortedHistory.first.careDate;
+                    }
+
+                    final DateTime? picked = await showDatePicker(
+                      context: context,
+                      initialDate: selectedCareDate,
+                      firstDate: previousRecordDate
+                              ?.add(const Duration(days: 1)) ??
+                          DateTime.now().subtract(const Duration(days: 365)),
+                      lastDate: DateTime.now(),
+                      locale: Localizations.localeOf(context),
+                    );
+                    if (picked != null) {
+                      setState(() {
+                        selectedCareDate = picked;
+                      });
+                    }
+                  },
+                  icon: const Icon(Icons.calendar_today, size: 18),
+                  label: Text(
+                    DateFormat('MM-dd').format(selectedCareDate),
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                ),
+                const Spacer(),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      careCheck.clear();
+                      careDetailsControllers.clear();
+                      selectedCareDate = DateTime.now(); // 重置日期
+                    });
+                  },
+                  child: Text('取消'),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (!careCheck.containsValue(true)) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content:
+                              Text(AppLocalizations.of(context)!.noCaresError)));
+                      return;
+                    }
+                    
+                    final selectedDateStart =
+                        DateTime(selectedCareDate.year, selectedCareDate.month, selectedCareDate.day);
+                    final selectedDateEnd = selectedDateStart.add(const Duration(days: 1));
+
+                    careCheck.forEach((key, value) {
+                      if (value == true) {
+                        var careIndex = plant.cares
+                            .indexWhere((element) => element.name == key.name);
+                        if (careIndex != -1) {
+                          plant.cares[careIndex].effected = selectedCareDate;
+
+                          // 获取养护详情
+                          String? details =
+                              careDetailsControllers[key]?.text.trim();
+                          if (details != null && details.isEmpty) {
+                            details = null;
+                          }
+
+                          // 移除选定日期已有的同种养护记录
+                          plant.careHistory.removeWhere((history) =>
+                              history.careName == key.name &&
+                              history.careDate.isAfter(selectedDateStart) &&
+                              history.careDate.isBefore(selectedDateEnd));
+
+                          // 添加新的养护记录
+                          plant.careHistory.add(CareHistory(
+                            careDate: selectedCareDate,
+                            careName: key.name,
+                            details: details,
+                          ));
+                        }
+                      }
+                    });
+
+                    await garden.updatePlant(plant);
+
+                    // 重置养护卡片状态
+                    setState(() {
+                      careCheck.clear();
+                      careDetailsControllers.clear();
+                      selectedCareDate = DateTime.now(); // 重置日期
+                    });
+
+                    // 显示成功提示
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                         content:
-                            Text(AppLocalizations.of(context)!.noCaresError)));
-                    return;
-                  }
-                  final today = DateTime.now();
-                  final todayStart =
-                      DateTime(today.year, today.month, today.day);
-                  final todayEnd = todayStart.add(const Duration(days: 1));
-
-                  careCheck.forEach((key, value) {
-                    if (value == true) {
-                      var careIndex = plant.cares
-                          .indexWhere((element) => element.name == key.name);
-                      if (careIndex != -1) {
-                        plant.cares[careIndex].effected = DateTime.now();
-
-                        // 获取养护详情
-                        String? details =
-                            careDetailsControllers[key]?.text.trim();
-                        if (details != null && details.isEmpty) {
-                          details = null;
-                        }
-
-                        // 移除今天已有的同种养护记录
-                        plant.careHistory.removeWhere((history) =>
-                            history.careName == key.name &&
-                            history.careDate.isAfter(todayStart) &&
-                            history.careDate.isBefore(todayEnd));
-
-                        // 添加新的养护记录
-                        plant.careHistory.add(CareHistory(
-                          careDate: DateTime.now(),
-                          careName: key.name,
-                          details: details,
-                        ));
-                      }
-                    }
-                  });
-
-                  await garden.updatePlant(plant);
-
-                  // 重置养护卡片状态
-                  setState(() {
-                    careCheck.clear();
-                    careDetailsControllers.clear();
-                  });
-
-                  // 显示成功提示
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content:
-                          Text(AppLocalizations.of(context)!.careSuccess)));
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
+                            Text(AppLocalizations.of(context)!.careSuccess)));
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: Text('确定'),
                 ),
-                child: Text('确定'),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
-    }
+        );
+      }
 
     return careWidgets;
   }
