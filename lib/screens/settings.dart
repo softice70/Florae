@@ -79,11 +79,20 @@ class _SettingsScreen extends State<SettingsScreen> {
                           color: Colors.red),
                       title: Text(
                           AppLocalizations.of(context)!.testNotificationButton),
-                      onTap: () {
-                        notify.singleNotification(
-                            AppLocalizations.of(context)!.testNotificationTitle,
-                            AppLocalizations.of(context)!.testNotificationBody,
-                            2);
+                      onTap: () async {
+                        try {
+                          await notify.singleNotification(
+                              AppLocalizations.of(context)!.testNotificationTitle,
+                              AppLocalizations.of(context)!.testNotificationBody,
+                              2);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('测试通知已发送，请检查通知栏')),
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('发送失败: $e')),
+                          );
+                        }
                       }),
                 ]),
               ),

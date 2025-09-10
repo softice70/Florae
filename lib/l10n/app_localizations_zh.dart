@@ -181,10 +181,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deletePlantBody => '您将彻底删除此植物，此操作无法撤销。';
 
   @override
-  String get exportData => 'Export garden';
+  String get exportData => '导出花园';
 
   @override
-  String get importData => 'Import garden';
+  String get importData => '导入花园';
 
   @override
   String get careSuccess => '养护记录成功';
@@ -193,17 +193,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get careHistory => '养护历史';
 
   @override
-  String get unsuccessfullyRestore => 'Unable to restore the backup.';
+  String get unsuccessfullyRestore => '无法恢复备份。';
 
   @override
-  String get unsuccessfullyBackup => 'Unable to create a backup file.';
+  String get unsuccessfullyBackup => '无法创建备份文件。';
 
   @override
-  String get atDay => 'Daytime';
+  String get atDay => '上午';
 
   @override
-  String get atNoon => 'At noon';
+  String get atNoon => '下午';
 
   @override
-  String get atNight => 'At night';
+  String get atNight => '晚上';
 }

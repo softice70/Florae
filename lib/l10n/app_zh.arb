@@ -62,6 +62,13 @@
   "@careSuccess": {},
   "careHistory": "养护历史",
   "@careHistory": {},
+  "exportData": "导出花园",
+  "importData": "导入花园",
+  "unsuccessfullyRestore": "无法恢复备份。",
+  "unsuccessfullyBackup": "无法创建备份文件。",
+  "atDay": "上午",
+  "atNoon": "下午",
+  "atNight": "晚上",
   "@helloWorld": {
     "description": "传统的新生儿程序员问候语"
   }
