@@ -64,6 +64,7 @@
   "atDay": "Morgens",
   "atNoon": "Mittags",
   "atNight": "Abends",
+  "careHistory": "Pflegeverlauf",
   "@helloWorld": {
     "description": "Die herkömmliche Begrüßung eines neugeborenen Programmierers"
   }

@@ -20,6 +20,7 @@ import 'care_plant.dart';
 import 'care_calendar_simple.dart';
 import 'manage_plant.dart';
 import 'settings.dart';
+import 'care_history_screen.dart';
 
 enum Page { today, garden }
 
@@ -200,17 +201,6 @@ class _MyHomePageState extends State<MyHomePage> {
         title: FittedBox(fit: BoxFit.fitWidth, child: Text(title)),
         titleTextStyle: Theme.of(context).textTheme.displayLarge,
         actions: <Widget>[
-          _currentPage == Page.today
-              ? IconButton(
-                  icon: const Icon(Icons.checklist_rounded),
-                  iconSize: 25,
-                  color: Theme.of(context).colorScheme.primary,
-                  tooltip: AppLocalizations.of(context)!.tooltipCareAll,
-                  onPressed: () {
-                    _showWaterAllPlantsDialog();
-                  },
-                )
-              : const SizedBox.shrink(),
           IconButton(
             icon: const Icon(Icons.event_note),
             iconSize: 25,
@@ -228,6 +218,20 @@ class _MyHomePageState extends State<MyHomePage> {
               setState(() {
                 _loadPlants();
               });
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.history),
+            iconSize: 25,
+            color: Theme.of(context).colorScheme.primary,
+            tooltip: AppLocalizations.of(context)!.careHistory,
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (context) => const CareHistoryScreen(),
+                ),
+              );
             },
           ),
           IconButton(

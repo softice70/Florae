@@ -187,7 +187,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importData => 'Import garden';
 
   @override
-  String get careSuccess => 'Care recorded successfully';
+  String get careSuccess => 'Care Success';
+
+  @override
+  String get careHistory => 'Care History';
 
   @override
   String get unsuccessfullyRestore => 'Unable to restore the backup.';

@@ -190,6 +190,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get careSuccess => '养护记录成功';
 
   @override
+  String get careHistory => '养护历史';
+
+  @override
   String get unsuccessfullyRestore => 'Unable to restore the backup.';
 
   @override

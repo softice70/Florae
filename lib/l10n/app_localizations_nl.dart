@@ -187,7 +187,10 @@ class AppLocalizationsNl extends AppLocalizations {
   String get importData => 'Import garden';
 
   @override
-  String get careSuccess => 'Care recorded successfully';
+  String get careSuccess => 'Care Success';
+
+  @override
+  String get careHistory => 'Verzorgingsgeschiedenis';
 
   @override
   String get unsuccessfullyRestore => 'Unable to restore the backup.';
@@ -196,11 +199,11 @@ class AppLocalizationsNl extends AppLocalizations {
   String get unsuccessfullyBackup => 'Unable to create a backup file.';
 
   @override
-  String get atDay => 'Daytime';
+  String get atDay => 'Overdag';
 
   @override
-  String get atNoon => 'At noon';
+  String get atNoon => '\'s Middags';
 
   @override
-  String get atNight => 'At night';
+  String get atNight => '\'s Nachts';
 }

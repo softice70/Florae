@@ -6,6 +6,7 @@
   "buttonGarden": "花园",
   "buttonToday": "今天",
   "tooltipCareAll": "养护所有植物",
+  "careHistory": "养护历史",
   "tooltipShowCalendar": "显示日历",
   "tooltipSettings": "设置",
   "tooltipNewPlant": "新增植物",
@@ -58,6 +59,9 @@
   "deletePlantTitle": "删除植物",
   "deletePlantBody": "您将彻底删除此植物，此操作无法撤销。",
   "careSuccess": "养护记录成功",
+  "@careSuccess": {},
+  "careHistory": "养护历史",
+  "@careHistory": {},
   "@helloWorld": {
     "description": "传统的新生儿程序员问候语"
   }

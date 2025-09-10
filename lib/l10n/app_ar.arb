@@ -58,6 +58,10 @@
   "deletePlantTitle": "حذف الغرس",
 
   "deletePlantBody": "أنت على وشك حذف نباتك بشكل نهائي، هذا الفعل لا عودة عنه.",
+  "atDay": "نهارًا",
+  "atNoon": "بعد الظهر",
+  "atNight": "ليلًا",
+  "careHistory": "سجل العناية",
   "@helloWorld": {
     "description": "تحية المبرمجين الجدد المتعارف عليها"
   }

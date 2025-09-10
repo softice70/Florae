@@ -470,8 +470,14 @@ abstract class AppLocalizations {
   /// No description provided for @careSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Care recorded successfully'**
+  /// **'Care Success'**
   String get careSuccess;
+
+  /// No description provided for @careHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Care History'**
+  String get careHistory;
 
   /// No description provided for @unsuccessfullyRestore.
   ///

@@ -64,6 +64,7 @@
   "atDay": "De jour",
   "atNoon": "D'après-midi",
   "atNight": "De nuit",
+  "careHistory": "Historique de soins",
   "@helloWorld": {
     "description": "La formule de politesse de tout programmeur"
   }

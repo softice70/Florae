@@ -57,6 +57,10 @@
   "careNotificationDescription": "Ontvang plant verzorging notificaties",
   "deletePlantTitle": "Verwijder plant",
   "deletePlantBody": "Je gaat je plant definitief elimineren, deze actie kan niet ongedaan worden gemaakt.",
+  "atDay": "Overdag",
+  "atNoon": "'s Middags",
+  "atNight": "'s Nachts",
+  "careHistory": "Verzorgingsgeschiedenis",
   "@helloWorld": {
     "description": "De conventionele groet voor nieuwe programmeurs"
   }
