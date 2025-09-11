@@ -516,7 +516,7 @@ class _MyHomePageState extends State<MyHomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 AspectRatio(
-                  aspectRatio: 18 / 12,
+                  aspectRatio: 1.08,
                   child: plant.picture!.contains("florae_avatar")
                       ? Image.asset(
                           plant.picture!,
@@ -527,30 +527,35 @@ class _MyHomePageState extends State<MyHomePage> {
                           fit: BoxFit.fitWidth,
                         ),
                 ),
-                Expanded(
+                Flexible(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 8.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        FittedBox(
-                          fit: BoxFit.fitWidth,
-                          child: Text(
-                            plant.name,
-                            style: theme.textTheme.titleLarge,
-                            maxLines: 1,
+                        Text(
+                          plant.name,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            height: 1.0, // 进一步减少植物名称的行高
+                            fontSize: 16, // 减小字体大小
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 6.0),
+                        const SizedBox(height: 2.0),
                         Text(
                           plant.description,
-                          style: theme.textTheme.titleSmall,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            height: 0.9, // 进一步减少行高
+                            fontSize: 12, // 减小字体大小
+                          ),
                         ),
-                        const SizedBox(height: 8.0),
                         SizedBox(
                             height: 20.0,
                             child: FittedBox(
-                              alignment: Alignment.centerLeft,
+                              alignment: Alignment.topLeft,
                               child: plant.cares.isNotEmpty
                                   ? Row(
                                       mainAxisSize: MainAxisSize.max,

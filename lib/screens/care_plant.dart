@@ -54,7 +54,27 @@ class _CarePlantScreen extends State<CarePlantScreen> {
   List<Widget> _buildCares(BuildContext context, Plant plant) {
     List<Widget> careWidgets = [];
 
-    for (Care care in plant.cares) {
+    // 获取标准的养护类型顺序
+    final standardCareOrder = [
+      'water',
+      'spray', 
+      'rotate',
+      'prune',
+      'fertilise',
+      'transplant',
+      'clean'
+    ];
+
+    // 按照标准顺序遍历养护类型
+    for (String careType in standardCareOrder) {
+      // 查找植物是否有这种养护类型
+      Care? care = plant.cares.firstWhere(
+        (c) => c.name == careType,
+        orElse: () => Care(name: '', cycles: 0, effected: null, id: 0),
+      );
+      
+      // 如果植物没有这种养护类型，跳过
+      if (care.name.isEmpty) continue;
       final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
       int daysToCare = care.cycles - care.daysSinceLastCare(today);
 

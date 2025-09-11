@@ -213,85 +213,80 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 左侧：植物缩略图和名称
-              SizedBox(
-                width: 80,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: SizedBox(
-                        width: 60,
-                        height: 60,
-                        child: _buildPlantImage(plant),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      plant.name,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+              // 左侧：植物缩略图
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: SizedBox(
+                  width: 60,
+                  height: 60,
+                  child: _buildPlantImage(plant),
                 ),
               ),
               const SizedBox(width: 12),
-              // 右侧：养护记录列表
+              // 右侧：植物名称和养护记录列表
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: histories.map((history) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          // 养护类型图标
-                          Container(
-                            width: 24,
-                            height: 24,
-                            margin: const EdgeInsets.only(right: 8),
-                            child: _getCareIcon(history.careName),
+                  children: [
+                    // 第一行：植物名称
+                    Text(
+                      plant.name,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
-                          // 养护详情
-                          Expanded(
-                            child: history.details != null && history.details!.isNotEmpty
-                                ? RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text: _getCareChineseName(history.careName),
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium
-                                              ?.copyWith(fontWeight: FontWeight.w500),
-                                        ),
-                                        TextSpan(
-                                          text: ' ${history.details}',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium,
-                                        ),
-                                      ],
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    // 养护记录列表
+                    ...histories.map((history) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // 养护类型图标
+                            Container(
+                              width: 24,
+                              height: 24,
+                              margin: const EdgeInsets.only(right: 8),
+                              child: _getCareIcon(history.careName),
+                            ),
+                            // 养护详情
+                            Expanded(
+                              child: history.details != null && history.details!.isNotEmpty
+                                  ? RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text: _getCareChineseName(history.careName),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.copyWith(fontWeight: FontWeight.w500),
+                                          ),
+                                          TextSpan(
+                                            text: ' ${history.details}',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium,
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  : Text(
+                                      _getCareChineseName(history.careName),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(fontWeight: FontWeight.w500),
                                     ),
-                                  )
-                                : Text(
-                                    _getCareChineseName(history.careName),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(fontWeight: FontWeight.w500),
-                                  ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ],
                 ),
               ),
             ],

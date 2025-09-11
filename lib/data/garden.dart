@@ -75,4 +75,14 @@ class Garden {
       return false;
     }
   }
+
+  // 清空所有花园数据
+  Future<bool> clearAllData() async {
+    try {
+      await store.remove("plants");
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 }

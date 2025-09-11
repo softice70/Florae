@@ -134,10 +134,53 @@ class _SettingsScreen extends State<SettingsScreen> {
                             Navigator.of(context).pop();
                             
                             if (successfullyBackedUp) {
+                              // 显示成功对话框
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    icon: const Icon(
+                                      Icons.check_circle,
+                                      color: Colors.green,
+                                      size: 48,
+                                    ),
+                                    title: const Text('导出成功'),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text('花园数据已成功导出！'),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          '导出内容包括植物信息、养护记录和图片',
+                                          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                                        ),
+                                      ],
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('确定'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                              
+                              // 同时显示简短的 SnackBar
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('数据导出成功！'),
+                                  content: Row(
+                                    children: [
+                                      Icon(Icons.check_circle, color: Colors.white),
+                                      SizedBox(width: 8),
+                                      Text('数据导出成功'),
+                                    ],
+                                  ),
                                   backgroundColor: Colors.green,
+                                  duration: Duration(seconds: 2),
                                 ),
                               );
                             } else {
@@ -168,6 +211,61 @@ class _SettingsScreen extends State<SettingsScreen> {
                             color: Colors.blueGrey),
                         title: Text(AppLocalizations.of(context)!.importData),
                         onTap: () async {
+                          // 显示确认对话框
+                          bool? shouldProceed = await showDialog<bool>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                icon: const Icon(
+                                  Icons.warning,
+                                  color: Colors.orange,
+                                  size: 48,
+                                ),
+                                title: const Text('导入花园数据'),
+                                content: const Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('导入新数据将会：'),
+                                    SizedBox(height: 8),
+                                    Text('• 清空当前所有植物数据'),
+                                    Text('• 清空所有养护历史记录'),
+                                    Text('• 删除所有植物图片'),
+                                    SizedBox(height: 12),
+                                    Text(
+                                      '此操作不可撤销，请确认是否继续？',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(false);
+                                    },
+                                    child: const Text('取消'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(true);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.red,
+                                      foregroundColor: Colors.white,
+                                    ),
+                                    child: const Text('确认导入'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+
+                          // 如果用户取消，直接返回
+                          if (shouldProceed != true) return;
+
                           // 显示加载指示器
                           showDialog(
                             context: context,
@@ -187,24 +285,56 @@ class _SettingsScreen extends State<SettingsScreen> {
 
                           try {
                             var successfullyRestored =
-                                await BackupManager.restore();
+                                await BackupManager.restore(clearExistingData: true);
                             
                             // 关闭加载指示器
                             Navigator.of(context).pop();
                             
                             if (successfullyRestored) {
+                              // 显示成功对话框
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    icon: const Icon(
+                                      Icons.check_circle,
+                                      color: Colors.green,
+                                      size: 48,
+                                    ),
+                                    title: const Text('导入成功'),
+                                    content: const Text('花园数据已成功导入并覆盖原有数据！'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('确定'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                              
+                              // 同时显示 SnackBar
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('数据导入成功！'),
+                                  content: Row(
+                                    children: [
+                                      Icon(Icons.check_circle, color: Colors.white),
+                                      SizedBox(width: 8),
+                                      Text('数据导入成功'),
+                                    ],
+                                  ),
                                   backgroundColor: Colors.green,
+                                  duration: Duration(seconds: 2),
                                 ),
                               );
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
+                                const SnackBar(
                                   content: Text('导入失败：请确保选择的是有效的 Florae 备份文件（.json格式）'),
                                   backgroundColor: Colors.red,
-                                  duration: const Duration(seconds: 4),
+                                  duration: Duration(seconds: 4),
                                 ),
                               );
                             }

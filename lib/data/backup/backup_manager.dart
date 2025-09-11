@@ -44,7 +44,7 @@ class BackupManager {
     }
   }
 
-  static Future<bool> restore() async {
+  static Future<bool> restore({bool clearExistingData = false}) async {
     try {
       // 指定文件类型过滤器，支持 JSON 文件
       FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -85,6 +85,11 @@ class BackupManager {
         }
 
         var save = Save.fromJson(rawSave);
+
+        // 如果需要清空现有数据，先清空
+        if (clearExistingData) {
+          await garden.clearAllData();
+        }
 
         for (var plant in save.garden) {
           var binary = save.binaries.where((x) => x.id == plant.id);
