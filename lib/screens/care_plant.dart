@@ -256,10 +256,18 @@ class _CarePlantScreen extends State<CarePlantScreen> {
                           }
 
                           // 移除选定日期已有的同种养护记录
-                          plant.careHistory.removeWhere((history) =>
-                              history.careName == key.name &&
-                              history.careDate.isAfter(selectedDateStart) &&
-                              history.careDate.isBefore(selectedDateEnd));
+                          plant.careHistory.removeWhere((history) {
+                            if (history.careName != key.name) return false;
+                            
+                            // 将历史记录的日期也精确到天级别进行比较
+                            DateTime historyDate = DateTime(
+                              history.careDate.year,
+                              history.careDate.month,
+                              history.careDate.day,
+                            );
+                            
+                            return historyDate.isAtSameMomentAs(selectedDateStart);
+                          });
 
                           // 添加新的养护记录
                           plant.careHistory.add(CareHistory(

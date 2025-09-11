@@ -267,7 +267,7 @@ class _CareCalendarScreenState extends State<CareCalendarScreen> {
               ),
             ),
           ),
-          ...day.tasks.map((task) => _buildTaskItem(task)).toList(),
+          ..._buildGroupedTaskItems(day.tasks),
         ],
       ),
     );
@@ -309,7 +309,7 @@ class _CareCalendarScreenState extends State<CareCalendarScreen> {
     return InkWell(
       onTap: () => _onPlantTap(task.plant),
       child: Container(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
@@ -324,8 +324,8 @@ class _CareCalendarScreenState extends State<CareCalendarScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: SizedBox(
-                width: 50,
-                height: 50,
+                width: 60,
+                height: 60,
                 child: _buildPlantImage(task.plant),
               ),
             ),
@@ -409,6 +409,98 @@ class _CareCalendarScreenState extends State<CareCalendarScreen> {
         },
       );
     }
+  }
+
+  // 将同一植物的多个养护任务合并显示
+  List<Widget> _buildGroupedTaskItems(List<PlantCareTask> tasks) {
+    // 按植物分组
+    Map<String, List<PlantCareTask>> groupedTasks = {};
+    for (var task in tasks) {
+      String plantKey = task.plant.id.toString();
+      if (groupedTasks[plantKey] == null) {
+        groupedTasks[plantKey] = [];
+      }
+      groupedTasks[plantKey]!.add(task);
+    }
+
+    // 为每个植物创建一个合并的列表项
+    return groupedTasks.values.map((plantTasks) {
+      return _buildGroupedTaskItem(plantTasks);
+    }).toList();
+  }
+
+  Widget _buildGroupedTaskItem(List<PlantCareTask> plantTasks) {
+    Plant plant = plantTasks.first.plant;
+    bool hasOverdueTasks = plantTasks.any((task) => task.isOverdue);
+
+    return InkWell(
+      onTap: () => _onPlantTap(plant),
+      child: Container(
+        padding: const EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: Theme.of(context).dividerColor.withOpacity(0.3),
+              width: 0.5,
+            ),
+          ),
+        ),
+        child: Row(
+          children: [
+            // 植物缩略图
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: SizedBox(
+                width: 60,
+                height: 60,
+                child: _buildPlantImage(plant),
+              ),
+            ),
+            const SizedBox(width: 12),
+            // 植物名称和养护图标
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    plant.name,
+                    style: Theme.of(context).textTheme.titleMedium,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  // 养护图标行
+                  Row(
+                    children: plantTasks.map((task) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: Icon(
+                          DefaultValues.getCare(context, task.care.name)?.icon ?? Icons.help,
+                          color: task.isOverdue 
+                              ? Colors.red 
+                              : DefaultValues.getCare(context, task.care.name)?.color,
+                          size: 20,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+            // 如果有逾期任务，显示警告图标
+            if (hasOverdueTasks) ...[
+              const SizedBox(width: 8),
+              Icon(
+                Icons.warning,
+                color: Colors.red,
+                size: 20,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }
 
