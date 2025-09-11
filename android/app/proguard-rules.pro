@@ -10,3 +10,8 @@
 -keep class io.flutter.**  { *; }
 -keep class io.flutter.plugins.**  { *; }
 -dontwarn io.flutter.embedding.**
+
+# Google Play Core
+-keep class com.google.android.play.core.** { *; }
+-keep class com.google.android.play.core.splitcompat.** { *; }
+-dontwarn com.google.android.play.core.**
