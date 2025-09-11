@@ -109,12 +109,57 @@ class _SettingsScreen extends State<SettingsScreen> {
                         leading: const Icon(Icons.backup, color: Colors.blueGrey),
                         title: Text(AppLocalizations.of(context)!.exportData),
                         onTap: () async {
-                          var successfullyBackedUp =
-                              await BackupManager.backup();
-                          if (!successfullyBackedUp) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                content: Text(AppLocalizations.of(context)!
-                                    .unsuccessfullyBackup)));
+                          // 显示加载指示器
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (BuildContext context) {
+                              return const AlertDialog(
+                                content: Row(
+                                  children: [
+                                    CircularProgressIndicator(),
+                                    SizedBox(width: 20),
+                                    Text('正在导出数据...'),
+                                  ],
+                                ),
+                              );
+                            },
+                          );
+
+                          try {
+                            var successfullyBackedUp =
+                                await BackupManager.backup();
+                            
+                            // 关闭加载指示器
+                            Navigator.of(context).pop();
+                            
+                            if (successfullyBackedUp) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('数据导出成功！'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('导出失败：用户取消了操作或没有存储权限'),
+                                  backgroundColor: Colors.orange,
+                                  duration: Duration(seconds: 3),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            // 关闭加载指示器
+                            Navigator.of(context).pop();
+                            
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('导出过程中发生错误：$e'),
+                                backgroundColor: Colors.red,
+                                duration: const Duration(seconds: 4),
+                              ),
+                            );
                           }
                         }),
                     ListTile(
@@ -123,12 +168,57 @@ class _SettingsScreen extends State<SettingsScreen> {
                             color: Colors.blueGrey),
                         title: Text(AppLocalizations.of(context)!.importData),
                         onTap: () async {
-                          var successfullyRestored =
-                              await BackupManager.restore();
-                          if (!successfullyRestored) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                content: Text(AppLocalizations.of(context)!
-                                    .unsuccessfullyRestore)));
+                          // 显示加载指示器
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (BuildContext context) {
+                              return const AlertDialog(
+                                content: Row(
+                                  children: [
+                                    CircularProgressIndicator(),
+                                    SizedBox(width: 20),
+                                    Text('正在导入数据...'),
+                                  ],
+                                ),
+                              );
+                            },
+                          );
+
+                          try {
+                            var successfullyRestored =
+                                await BackupManager.restore();
+                            
+                            // 关闭加载指示器
+                            Navigator.of(context).pop();
+                            
+                            if (successfullyRestored) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('数据导入成功！'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('导入失败：请确保选择的是有效的 Florae 备份文件（.json格式）'),
+                                  backgroundColor: Colors.red,
+                                  duration: const Duration(seconds: 4),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            // 关闭加载指示器
+                            Navigator.of(context).pop();
+                            
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('导入过程中发生错误：$e'),
+                                backgroundColor: Colors.red,
+                                duration: const Duration(seconds: 4),
+                              ),
+                            );
                           }
                         }),
                   ])),

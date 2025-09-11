@@ -46,12 +46,44 @@ class BackupManager {
 
   static Future<bool> restore() async {
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles();
+      // 指定文件类型过滤器，支持 JSON 文件
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+        allowMultiple: false,
+        withData: true, // 确保可以读取文件数据
+      );
 
-      if (result != null) {
-        File file = File(result.files.single.path!);
+      if (result != null && result.files.isNotEmpty) {
+        final pickedFile = result.files.first;
+        
+        // 优先使用 bytes 数据，如果没有则使用文件路径
+        String fileContent;
+        if (pickedFile.bytes != null) {
+          // 从内存中读取文件内容（适用于从其他应用传来的文件）
+          fileContent = utf8.decode(pickedFile.bytes!);
+        } else if (pickedFile.path != null) {
+          // 从文件路径读取（适用于本地文件）
+          File file = File(pickedFile.path!);
+          fileContent = await file.readAsString();
+        } else {
+          return false;
+        }
 
-        var rawSave = jsonDecode(await file.readAsString());
+        // 验证文件内容是否为有效的 JSON
+        Map<String, dynamic> rawSave;
+        try {
+          rawSave = jsonDecode(fileContent);
+        } catch (e) {
+          // JSON 解析失败
+          return false;
+        }
+
+        // 验证是否为有效的 Florae 备份文件
+        if (!rawSave.containsKey('garden') || !rawSave.containsKey('binaries')) {
+          return false;
+        }
+
         var save = Save.fromJson(rawSave);
 
         for (var plant in save.garden) {
@@ -72,6 +104,8 @@ class BackupManager {
         return false;
       }
     } catch (ex) {
+      // 记录错误信息以便调试
+      print('Restore error: $ex');
       return false;
     }
   }
