@@ -383,7 +383,7 @@ class _CarePlantScreen extends State<CarePlantScreen> {
                     const Spacer(),
                     if (latestDate != null)
                       IconButton(
-                        icon: const Icon(Icons.edit, size: 20),
+                        icon: const Icon(Icons.history_edu, size: 20),
                         onPressed: () {
                           _editLatestDayCareHistory(context, plant, latestDate);
                         },
@@ -557,7 +557,7 @@ class _CarePlantScreen extends State<CarePlantScreen> {
                       title: Text(AppLocalizations.of(context)!.labelLocation),
                       subtitle: Text(plant.location ?? "")),
                   ListTile(
-                      leading: const Icon(Icons.cake),
+                      leading: const Icon(Icons.eco),
                       title:
                           Text(AppLocalizations.of(context)!.labelDayPlanted),
                       subtitle: Text(DateFormat.yMMMMd(

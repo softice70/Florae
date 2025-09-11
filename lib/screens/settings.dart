@@ -370,8 +370,8 @@ class _SettingsScreen extends State<SettingsScreen> {
                           showAboutDialog(
                             context: context,
                             applicationName: 'Florae',
-                            applicationVersion: '3.1.0',
-                            applicationLegalese: '© Naval Alcalá',
+                            applicationVersion: '4.0.1+1',
+                            applicationLegalese: '© Softice70',
                           );
                         }),
                   ])),

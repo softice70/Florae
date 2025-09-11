@@ -119,16 +119,7 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
                                 ),
                               ),
                             ),
-                            child: Text(
-                              _formatDate(dayData['date']),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.primary,
-                                  ),
-                            ),
+                            child: _buildDateText(dayData['date']),
                           ),
                           ...dayData['plants'].map<Widget>((plantData) {
                             return _buildPlantCareCard(
@@ -152,12 +143,54 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
     final checkDate = DateTime(date.year, date.month, date.day);
 
     if (checkDate == today) {
-      return AppLocalizations.of(context)!.now;
+      return '今天';
     } else if (checkDate == yesterday) {
       return '昨天'; // This could be localized if needed
     } else {
       return DateFormat('yyyy-MM-dd').format(date);
     }
+  }
+
+  Widget _buildDateText(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final checkDate = DateTime(date.year, date.month, date.day);
+    final daysDifference = today.difference(checkDate).inDays;
+
+    String mainText = _formatDate(date);
+    
+    // 如果是今天，不显示天数差
+    if (daysDifference == 0) {
+      return Text(
+        mainText,
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      );
+    }
+
+    // 其他日期显示天数差
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: mainText,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          TextSpan(
+            text: '     ${daysDifference}天前',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Colors.grey[500],
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildPlantImage(Plant plant) {
@@ -211,7 +244,7 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // 左侧：植物缩略图
               ClipRRect(

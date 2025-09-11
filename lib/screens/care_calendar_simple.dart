@@ -171,6 +171,56 @@ class _CareCalendarScreenState extends State<CareCalendarScreen> {
     }
   }
 
+  Widget _buildDateText(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final checkDate = DateTime(date.year, date.month, date.day);
+    final daysDifference = checkDate.difference(today).inDays;
+
+    String mainText = _formatDate(date);
+    
+    // 如果是今天，不显示天数差
+    if (daysDifference == 0) {
+      return Text(
+        mainText,
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      );
+    }
+
+    // 未来日期显示天数差
+    String daysText = '';
+    if (daysDifference > 0) {
+      daysText = '     ${daysDifference}天后';
+    } else {
+      // 过去日期显示天数差（虽然养护计划通常不会有过去的日期）
+      daysText = '     ${-daysDifference}天前';
+    }
+
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: mainText,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          TextSpan(
+            text: daysText,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Colors.grey[500],
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _onPlantTap(Plant plant) async {
     await Navigator.push(
       context,
@@ -259,13 +309,7 @@ class _CareCalendarScreenState extends State<CareCalendarScreen> {
                 topRight: Radius.circular(12),
               ),
             ),
-            child: Text(
-              _formatDate(day.date),
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
+            child: _buildDateText(day.date),
           ),
           ..._buildGroupedTaskItems(day.tasks),
         ],
