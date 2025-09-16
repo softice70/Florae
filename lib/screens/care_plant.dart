@@ -609,22 +609,43 @@ class _CarePlantScreen extends State<CarePlantScreen> {
                       Column(
                         children: [
                           const Divider(height: 1, thickness: 1),
-                          ListTile(
-                            leading: const Icon(Icons.topic),
-                            title:
-                                Text(AppLocalizations.of(context)!.labelDescription),
-                            subtitle: Markdown(
-                              data: plant.description,
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              styleSheet: MarkdownStyleSheet(
-                                p: Theme.of(context).textTheme.bodyMedium,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // 第一行：图标和标题（保持原有的左右边距）
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16.0,
+                                  vertical: 8.0,
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.topic),
+                                    const SizedBox(width: 16.0),
+                                    Text(
+                                      AppLocalizations.of(context)!.labelDescription,
+                                      style: Theme.of(context).textTheme.titleMedium,
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16.0,
-                              vertical: 8.0,
-                            ),
+                              // 第二行：详情文字内容（减少左右边距，增加显示宽度）
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 0,
+                                  right: 0,
+                                  bottom: 8.0,
+                                ),
+                                child: Markdown(
+                                  data: plant.description,
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  styleSheet: MarkdownStyleSheet(
+                                    p: Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           ListTile(
                             leading: const Icon(Icons.location_on),
