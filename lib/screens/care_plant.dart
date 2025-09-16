@@ -106,9 +106,25 @@ class _CarePlantScreen extends State<CarePlantScreen> {
 
       careWidgets.add(
         CheckboxListTile(
-          title:
+          title: Row(
+            children: [
               Text(DefaultValues.getCare(context, care.name)!.translatedName),
-          subtitle: Text(buildCareMessage(daysToCare)),
+              const SizedBox(width: 8),
+              Text(
+                '每${care.cycles}天一次',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+          subtitle: Text(
+            buildCareMessage(daysToCare),
+            style: TextStyle(
+              color: daysToCare < 0 ? Colors.red : null,
+            ),
+          ),
           value: careCheck[care],
           onChanged: (bool? value) {
             setState(() {

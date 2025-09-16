@@ -293,7 +293,6 @@ class _ManagePlantScreen extends State<ManagePlantScreen> {
                         // when user presses enter it will adapt to it
                         controller: descriptionController,
                         cursorColor: Theme.of(context).colorScheme.secondary,
-                        maxLength: 100,
                         decoration: InputDecoration(
                           icon: const Icon(Icons.topic),
                           labelText:

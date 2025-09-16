@@ -544,14 +544,6 @@ class _MyHomePageState extends State<MyHomePage> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 2.0),
-                        Text(
-                          plant.description,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            height: 0.9, // 进一步减少行高
-                            fontSize: 12, // 减小字体大小
-                          ),
-                        ),
                         SizedBox(
                             height: 20.0,
                             child: FittedBox(
