@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:florae/data/plant.dart';
 import 'package:florae/screens/picture_viewer.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:intl/intl.dart';
 
 import '../data/care.dart';
@@ -170,7 +171,7 @@ class _CarePlantScreen extends State<CarePlantScreen> {
                 ),
                 contentPadding: const EdgeInsets.all(12.0),
               ),
-              maxLines: 3,
+              maxLines: 10,
               minLines: 1,
             ),
           ),
@@ -585,7 +586,14 @@ class _CarePlantScreen extends State<CarePlantScreen> {
                             leading: const Icon(Icons.topic),
                             title:
                                 Text(AppLocalizations.of(context)!.labelDescription),
-                            subtitle: Text(plant.description),
+                            subtitle: Markdown(
+                              data: plant.description,
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              styleSheet: MarkdownStyleSheet(
+                                p: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16.0,
                               vertical: 8.0,
@@ -724,7 +732,7 @@ class _CarePlantScreen extends State<CarePlantScreen> {
                             prefixIcon: Icon(care.icon, color: care.color),
                             alignLabelWithHint: true,
                           ),
-                          maxLines: 4,
+                          maxLines: 10,
                           minLines: 2,
                           keyboardType: TextInputType.multiline,
                           textInputAction: TextInputAction.newline,
