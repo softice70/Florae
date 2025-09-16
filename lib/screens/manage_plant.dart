@@ -427,7 +427,7 @@ class _ManagePlantScreen extends State<ManagePlantScreen> {
 
             await garden.addOrUpdatePlant(newPlant);
 
-            Navigator.pop(context);
+            Navigator.pop(context, true);
           }
         },
         label: Text(AppLocalizations.of(context)!.saveButton),

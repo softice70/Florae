@@ -257,7 +257,6 @@ class _CarePlantScreen extends State<CarePlantScreen> {
                     
                     final selectedDateStart =
                         DateTime(selectedCareDate.year, selectedCareDate.month, selectedCareDate.day);
-                    final selectedDateEnd = selectedDateStart.add(const Duration(days: 1));
 
                     careCheck.forEach((key, value) {
                       if (value == true) {
@@ -482,9 +481,32 @@ class _CarePlantScreen extends State<CarePlantScreen> {
         ));
   }
 
+  Plant? _currentPlant;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_currentPlant == null) {
+      _currentPlant = ModalRoute.of(context)!.settings.arguments as Plant;
+    }
+  }
+
+  Future<void> _reloadPlantData() async {
+    if (_currentPlant != null) {
+      final allPlants = await garden.getAllPlants();
+      final updatedPlant = allPlants.firstWhere(
+        (p) => p.id == _currentPlant!.id,
+        orElse: () => _currentPlant!,
+      );
+      setState(() {
+        _currentPlant = updatedPlant;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final plant = ModalRoute.of(context)!.settings.arguments as Plant;
+    final plant = _currentPlant ?? (ModalRoute.of(context)!.settings.arguments as Plant);
 
     return Scaffold(
       appBar: AppBar(
@@ -501,12 +523,17 @@ class _CarePlantScreen extends State<CarePlantScreen> {
             color: Theme.of(context).colorScheme.primary,
             tooltip: AppLocalizations.of(context)!.tooltipEdit,
             onPressed: () async {
-              await Navigator.push(
+              final result = await Navigator.push(
                   context,
-                  MaterialPageRoute<void>(
+                  MaterialPageRoute<bool>(
                     builder: (context) => ManagePlantScreen(
                         title: "Manage plant", update: true, plant: plant),
                   ));
+              
+              // 如果编辑成功，重新加载植物数据
+              if (result == true) {
+                await _reloadPlantData();
+              }
             },
           )
         ],
