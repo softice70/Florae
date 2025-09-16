@@ -23,6 +23,7 @@ class CarePlantScreen extends StatefulWidget {
 
 class _CarePlantScreen extends State<CarePlantScreen> {
   int periodicityInHours = 1;
+  bool _isPlantDetailsExpanded = false; // 植物详情卡片默认折叠
   Map<Care, bool?> careCheck = {};
   Map<Care, TextEditingController> careDetailsControllers = {};
   DateTime selectedCareDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
@@ -546,24 +547,59 @@ class _CarePlantScreen extends State<CarePlantScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),
                 ),
-                child: Column(children: <Widget>[
-                  ListTile(
-                      leading: const Icon(Icons.topic),
-                      title:
-                          Text(AppLocalizations.of(context)!.labelDescription),
-                      subtitle: Text(plant.description)),
-                  ListTile(
-                      leading: const Icon(Icons.location_on),
-                      title: Text(AppLocalizations.of(context)!.labelLocation),
-                      subtitle: Text(plant.location ?? "")),
-                  ListTile(
-                      leading: const Icon(Icons.eco),
-                      title:
-                          Text(AppLocalizations.of(context)!.labelDayPlanted),
-                      subtitle: Text(DateFormat.yMMMMd(
-                              Localizations.localeOf(context).languageCode)
-                          .format(plant.createdAt))),
-                ]),
+                child: Column(
+                  children: <Widget>[
+                    ListTile(
+                      leading: const Icon(Icons.info_outline),
+                      title: const Text('植物详情'),
+                      trailing: Icon(_isPlantDetailsExpanded 
+                          ? Icons.expand_less 
+                          : Icons.expand_more),
+                      onTap: () {
+                        setState(() {
+                          _isPlantDetailsExpanded = !_isPlantDetailsExpanded;
+                        });
+                      },
+                    ),
+                    if (_isPlantDetailsExpanded)
+                      Column(
+                        children: [
+                          const Divider(height: 1, thickness: 1),
+                          ListTile(
+                            leading: const Icon(Icons.topic),
+                            title:
+                                Text(AppLocalizations.of(context)!.labelDescription),
+                            subtitle: Text(plant.description),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                              vertical: 8.0,
+                            ),
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.location_on),
+                            title: Text(AppLocalizations.of(context)!.labelLocation),
+                            subtitle: Text(plant.location ?? ""),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                              vertical: 8.0,
+                            ),
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.eco),
+                            title:
+                                Text(AppLocalizations.of(context)!.labelDayPlanted),
+                            subtitle: Text(DateFormat.yMMMMd(
+                                    Localizations.localeOf(context).languageCode)
+                                .format(plant.createdAt)),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                              vertical: 8.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
               ),
               Card(
                   semanticContainer: true,
