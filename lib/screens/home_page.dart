@@ -14,6 +14,7 @@ import 'package:responsive_grid_list/responsive_grid_list.dart';
 import '../background_task.dart';
 import '../data/care.dart';
 import '../data/default.dart';
+import '../data/temporary_care.dart';
 import '../l10n/app_localizations.dart';
 import '../main.dart';
 import 'care_plant.dart';
@@ -333,6 +334,8 @@ class _MyHomePageState extends State<MyHomePage> {
       for (Plant plant in allPlants) {
         cares[plant.name] = [];
         bool hasTodayTask = false;
+        // 使用Map来存储每种养护类型的最早时间
+        Map<String, DateTime> careTypeEarliestTimes = {};
         
         // 检查每种养护类型
         for (Care care in plant.cares) {
@@ -366,22 +369,53 @@ class _MyHomePageState extends State<MyHomePage> {
           // 智能计算下次待执行日期
           int daysSinceLastCare = currentDate.difference(lastCareDate).inDays;
           
+          // 确定任务日期
+          DateTime taskDate;
           if (daysSinceLastCare > care.cycles) {
             // 已经逾期，应该今天执行
+            taskDate = currentDate;
             hasTodayTask = true;
-            cares[plant.name]!.add(care.name);
           } else {
             // 计算正常下次执行日期
             DateTime nextCareDate = lastCareDate.add(Duration(days: care.cycles));
-            DateTime nextDate = DateTime(nextCareDate.year, nextCareDate.month, nextCareDate.day);
-            DateTime checkDay = DateTime(currentDate.year, currentDate.month, currentDate.day);
+            taskDate = DateTime(nextCareDate.year, nextCareDate.month, nextCareDate.day);
             
-            if (nextDate == checkDay) {
+            // 检查是否是今天
+            if (taskDate == currentDate) {
               hasTodayTask = true;
-              cares[plant.name]!.add(care.name);
+            } else {
+              // 不是今天的任务，跳过
+              continue;
+            }
+          }
+          
+          // 记录这个养护类型的最早时间
+          if (!careTypeEarliestTimes.containsKey(care.name) || 
+              taskDate.isBefore(careTypeEarliestTimes[care.name]!)) {
+            careTypeEarliestTimes[care.name] = taskDate;
+          }
+        }
+        
+        // 检查临时养护任务
+        for (TemporaryCare tempCare in plant.temporaryCares) {
+          // 检查临时任务是否是今天或已逾期
+          if (tempCare.isToday(currentDate) || tempCare.isOverdue(currentDate)) {
+            hasTodayTask = true;
+            
+            // 如果临时任务已过期，则将待执行日期设为今日
+            DateTime tempTaskDate = tempCare.isOverdue(currentDate) ? 
+              DateTime(currentDate.year, currentDate.month, currentDate.day) : tempCare.scheduledDate;
+            
+            // 记录这个养护类型的最早时间
+            if (!careTypeEarliestTimes.containsKey(tempCare.name) || 
+                tempTaskDate.isBefore(careTypeEarliestTimes[tempCare.name]!)) {
+              careTypeEarliestTimes[tempCare.name] = tempTaskDate;
             }
           }
         }
+        
+        // 将合并后的任务类型添加到列表中
+        cares[plant.name]!.addAll(careTypeEarliestTimes.keys);
         
         // 如果有需要养护的任务，添加植物
         if (cares[plant.name]!.isNotEmpty) {

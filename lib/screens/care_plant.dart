@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 
 import '../data/care.dart';
 import '../data/care_history.dart';
+import '../data/temporary_care.dart';
 import '../data/default.dart';
 import '../l10n/app_localizations.dart';
 import '../main.dart';
@@ -28,6 +29,10 @@ class _CarePlantScreen extends State<CarePlantScreen> {
   Map<Care, bool?> careCheck = {};
   Map<Care, TextEditingController> careDetailsControllers = {};
   DateTime selectedCareDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+  
+  // 临时养护任务相关状态
+  Map<TemporaryCare, bool?> temporaryCareCheck = {};
+  Map<TemporaryCare, TextEditingController> temporaryCareDetailsControllers = {};
 
   @override
   void initState() {
@@ -38,6 +43,9 @@ class _CarePlantScreen extends State<CarePlantScreen> {
   void dispose() {
     // 释放所有文本控制器
     for (final controller in careDetailsControllers.values) {
+      controller.dispose();
+    }
+    for (final controller in temporaryCareDetailsControllers.values) {
       controller.dispose();
     }
     super.dispose();
@@ -332,6 +340,206 @@ class _CarePlantScreen extends State<CarePlantScreen> {
       }
 
     return careWidgets;
+  }
+
+  List<Widget> _buildTemporaryCares(BuildContext context, Plant plant) {
+    List<Widget> temporaryCareWidgets = [];
+
+    if (plant.temporaryCares.isEmpty) {
+      temporaryCareWidgets.add(
+        const Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Text(
+            '暂无临时养护任务',
+            style: TextStyle(color: Colors.grey),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+      return temporaryCareWidgets;
+    }
+
+    // 按日期排序临时任务
+    final sortedTemporaryCares = List<TemporaryCare>.from(plant.temporaryCares)
+      ..sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
+
+    for (TemporaryCare temporaryCare in sortedTemporaryCares) {
+      final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      int daysUntilScheduled = temporaryCare.daysUntilScheduled(today);
+
+      if (temporaryCareCheck[temporaryCare] == null) {
+        temporaryCareCheck[temporaryCare] = false;
+      }
+
+      // 为每个临时养护任务创建文本控制器
+      if (temporaryCareDetailsControllers[temporaryCare] == null) {
+        temporaryCareDetailsControllers[temporaryCare] = TextEditingController();
+        if (temporaryCare.description != null) {
+          temporaryCareDetailsControllers[temporaryCare]!.text = temporaryCare.description!;
+        }
+      }
+
+      String statusMessage;
+      Color? statusColor;
+      if (daysUntilScheduled == 0) {
+        statusMessage = '今天';
+        statusColor = Colors.orange;
+      } else if (daysUntilScheduled < 0) {
+        statusMessage = '已过期 ${daysUntilScheduled.abs()} 天';
+        statusColor = Colors.red;
+      } else {
+        statusMessage = '还有 $daysUntilScheduled 天';
+        statusColor = null;
+      }
+
+      temporaryCareWidgets.add(
+        CheckboxListTile(
+          title: Row(
+            children: [
+              Text(DefaultValues.getCare(context, temporaryCare.name)!.translatedName),
+              const SizedBox(width: 8),
+              Text(
+                '临时任务',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.orange,
+                ),
+              ),
+            ],
+          ),
+          subtitle: Text(
+            statusMessage,
+            style: TextStyle(
+              color: statusColor,
+            ),
+          ),
+          value: temporaryCareCheck[temporaryCare],
+          onChanged: (bool? value) {
+            setState(() {
+              temporaryCareCheck[temporaryCare] = value;
+              // 确保文本控制器存在并包含正确的描述内容
+              if (temporaryCareDetailsControllers[temporaryCare] == null) {
+                temporaryCareDetailsControllers[temporaryCare] = TextEditingController();
+              }
+              if (temporaryCare.description != null) {
+                temporaryCareDetailsControllers[temporaryCare]!.text = temporaryCare.description!;
+              } else {
+                temporaryCareDetailsControllers[temporaryCare]!.clear();
+              }
+            });
+          },
+          secondary: Icon(DefaultValues.getCare(context, temporaryCare.name)!.icon,
+              color: DefaultValues.getCare(context, temporaryCare.name)!.color),
+        ),
+      );
+
+      // 如果临时养护任务被选中，显示详情输入框和操作按钮
+      if (temporaryCareCheck[temporaryCare] == true) {
+        temporaryCareWidgets.add(
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 8.0),
+            child: TextField(
+              controller: temporaryCareDetailsControllers[temporaryCare],
+              decoration: InputDecoration(
+                hintText: '记录${DefaultValues.getCare(context, temporaryCare.name)!.translatedName}详情（可选）',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                contentPadding: const EdgeInsets.all(12.0),
+              ),
+              maxLines: 10,
+              minLines: 1,
+            ),
+          ),
+        );
+
+        // 添加操作按钮
+        temporaryCareWidgets.add(
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      temporaryCareCheck[temporaryCare] = false;
+                      temporaryCareDetailsControllers[temporaryCare]?.clear();
+                    });
+                  },
+                  child: const Text('取消'),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: () async {
+                    // 删除临时任务
+                    setState(() {
+                      plant.temporaryCares.remove(temporaryCare);
+                      temporaryCareCheck.remove(temporaryCare);
+                      temporaryCareDetailsControllers[temporaryCare]?.dispose();
+                      temporaryCareDetailsControllers.remove(temporaryCare);
+                    });
+                    await garden.updatePlant(plant);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('临时任务已删除')),
+                    );
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.red,
+                  ),
+                  child: const Text('删除'),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () async {
+                    // 完成临时任务
+                    final selectedDateStart = DateTime(
+                      selectedCareDate.year,
+                      selectedCareDate.month,
+                      selectedCareDate.day,
+                    );
+
+                    // 获取养护详情
+                    String? details = temporaryCareDetailsControllers[temporaryCare]?.text.trim();
+                    if (details != null && details.isEmpty) {
+                      details = null;
+                    }
+
+                    // 添加到养护历史
+                    plant.careHistory.add(CareHistory(
+                      careDate: selectedDateStart,
+                      careName: temporaryCare.name,
+                      details: details,
+                    ));
+
+                    // 删除临时任务
+                    plant.temporaryCares.remove(temporaryCare);
+                    temporaryCareCheck.remove(temporaryCare);
+                    temporaryCareDetailsControllers[temporaryCare]?.dispose();
+                    temporaryCareDetailsControllers.remove(temporaryCare);
+
+                    await garden.updatePlant(plant);
+
+                    setState(() {});
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('临时任务已完成')),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('确定'),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    }
+
+    return temporaryCareWidgets;
   }
 
   Widget _buildCareHistory(Plant plant) {
@@ -687,6 +895,35 @@ class _CarePlantScreen extends State<CarePlantScreen> {
                       ..._buildCares(context, plant),
                     ],
                   )),
+              const SizedBox(height: 16),
+              // 临时养护任务卡片
+              Card(
+                  semanticContainer: true,
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  child: Column(
+                    children: [
+                      // 临时养护任务标题
+                      ListTile(
+                        leading: const Icon(Icons.add_task),
+                        title: const Text('临时养护任务'),
+                        tileColor: Colors.green.shade50,
+                        trailing: IconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: () {
+                            _showAddTemporaryCareDialog(context, plant);
+                          },
+                          tooltip: '添加临时任务',
+                        ),
+                      ),
+                      const Divider(height: 1, thickness: 1),
+                      ..._buildTemporaryCares(context, plant),
+                    ],
+                  )),
+              const SizedBox(height: 16),
               // 历史养护记录
               _buildCareHistory(plant),
               const SizedBox(height: 70),
@@ -851,6 +1088,157 @@ class _CarePlantScreen extends State<CarePlantScreen> {
           },
         );
       },
+    );
+  }
+
+  void _showAddTemporaryCareDialog(BuildContext context, Plant plant) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return _AddTemporaryCareDialog(
+          plant: plant,
+          onTaskAdded: () {
+            setState(() {});
+          },
+        );
+      },
+    );
+  }
+}
+
+class _AddTemporaryCareDialog extends StatefulWidget {
+  final Plant plant;
+  final VoidCallback onTaskAdded;
+
+  const _AddTemporaryCareDialog({
+    required this.plant,
+    required this.onTaskAdded,
+  });
+
+  @override
+  State<_AddTemporaryCareDialog> createState() => _AddTemporaryCareDialogState();
+}
+
+class _AddTemporaryCareDialogState extends State<_AddTemporaryCareDialog> {
+  String? selectedCareType;
+  DateTime selectedDate = DateTime.now();
+  final TextEditingController descriptionController = TextEditingController();
+
+  @override
+  void dispose() {
+    descriptionController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('添加临时养护任务'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 任务类型选择
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                labelText: '养护类型',
+                border: OutlineInputBorder(),
+              ),
+              value: selectedCareType,
+              items: DefaultValues.getCares(context).entries.map((entry) {
+                return DropdownMenuItem<String>(
+                  value: entry.key,
+                  child: Row(
+                    children: [
+                      Icon(entry.value.icon, color: entry.value.color, size: 20),
+                      const SizedBox(width: 8),
+                      Text(entry.value.translatedName),
+                    ],
+                  ),
+                );
+              }).toList(),
+              onChanged: (String? value) {
+                setState(() {
+                  selectedCareType = value;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            // 日期选择
+            ListTile(
+              title: const Text('计划日期'),
+              subtitle: Text(DateFormat.yMd().format(selectedDate)),
+              trailing: const Icon(Icons.calendar_today),
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: selectedDate,
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                );
+                if (picked != null) {
+                  setState(() {
+                    selectedDate = picked;
+                  });
+                }
+              },
+            ),
+            const SizedBox(height: 16),
+            // 描述输入
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(
+                labelText: '描述（可选）',
+                border: OutlineInputBorder(),
+                alignLabelWithHint: true,
+              ),
+              maxLines: 3,
+              minLines: 1,
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('取消'),
+        ),
+        ElevatedButton(
+          onPressed: selectedCareType == null
+              ? null
+              : () async {
+                  // 创建新的临时任务
+                  final temporaryCare = TemporaryCare(
+                    id: DateTime.now().millisecondsSinceEpoch,
+                    name: selectedCareType!,
+                    scheduledDate: selectedDate,
+                    description: descriptionController.text.trim().isEmpty
+                        ? null
+                        : descriptionController.text.trim(),
+                  );
+
+                  // 添加到植物的临时任务列表
+                  widget.plant.temporaryCares.add(temporaryCare);
+                  await garden.updatePlant(widget.plant);
+
+                  Navigator.of(context).pop();
+
+                  // 刷新界面
+                  widget.onTaskAdded();
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('临时任务已添加')),
+                  );
+                },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green,
+            foregroundColor: Colors.white,
+          ),
+          child: const Text('添加'),
+        ),
+      ],
     );
   }
 }
