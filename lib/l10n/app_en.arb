@@ -24,6 +24,7 @@
   "labelName": "Name",
   "exampleName": "Ex: Pilea",
   "labelDescription": "Description",
+  "exampleDescription": "Supports markdown syntax",
   "labelLocation": "Location",
   "exampleLocation": "Ex: Courtyard",
   "labelDayPlanted": "Day planted",

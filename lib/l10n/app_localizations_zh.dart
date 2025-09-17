@@ -82,6 +82,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get labelDescription => '详情';
 
   @override
+  String get exampleDescription => '支持markdown语法';
+
+  @override
   String get labelLocation => '位置';
 
   @override

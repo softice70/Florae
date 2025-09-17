@@ -22,6 +22,7 @@ import 'care_calendar_simple.dart';
 import 'manage_plant.dart';
 import 'settings.dart';
 import 'care_history_screen.dart';
+import 'journal_screen.dart';
 
 enum Page { today, garden }
 
@@ -231,6 +232,20 @@ class _MyHomePageState extends State<MyHomePage> {
                 context,
                 MaterialPageRoute<void>(
                   builder: (context) => const CareHistoryScreen(),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.book),
+            iconSize: 25,
+            color: Theme.of(context).colorScheme.primary,
+            tooltip: "养护随笔",
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (context) => const JournalScreen(),
                 ),
               );
             },

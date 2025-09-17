@@ -82,8 +82,10 @@ class _SettingsScreen extends State<SettingsScreen> {
                       onTap: () async {
                         try {
                           await notify.singleNotification(
-                              AppLocalizations.of(context)!.testNotificationTitle,
-                              AppLocalizations.of(context)!.testNotificationBody,
+                              AppLocalizations.of(context)!
+                                  .testNotificationTitle,
+                              AppLocalizations.of(context)!
+                                  .testNotificationBody,
                               2);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('测试通知已发送，请检查通知栏')),
@@ -106,7 +108,8 @@ class _SettingsScreen extends State<SettingsScreen> {
                   child: Column(children: <Widget>[
                     ListTile(
                         trailing: const Icon(Icons.arrow_right),
-                        leading: const Icon(Icons.backup, color: Colors.blueGrey),
+                        leading:
+                            const Icon(Icons.backup, color: Colors.blueGrey),
                         title: Text(AppLocalizations.of(context)!.exportData),
                         onTap: () async {
                           // 显示加载指示器
@@ -129,10 +132,10 @@ class _SettingsScreen extends State<SettingsScreen> {
                           try {
                             var successfullyBackedUp =
                                 await BackupManager.backup();
-                            
+
                             // 关闭加载指示器
                             Navigator.of(context).pop();
-                            
+
                             if (successfullyBackedUp) {
                               // 显示成功对话框
                               showDialog(
@@ -147,13 +150,16 @@ class _SettingsScreen extends State<SettingsScreen> {
                                     title: const Text('导出成功'),
                                     content: Column(
                                       mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         const Text('花园数据已成功导出！'),
                                         const SizedBox(height: 8),
                                         Text(
                                           '导出内容包括植物信息、养护记录和图片',
-                                          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                                          style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey[600]),
                                         ),
                                       ],
                                     ),
@@ -168,13 +174,14 @@ class _SettingsScreen extends State<SettingsScreen> {
                                   );
                                 },
                               );
-                              
+
                               // 同时显示简短的 SnackBar
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Row(
                                     children: [
-                                      Icon(Icons.check_circle, color: Colors.white),
+                                      Icon(Icons.check_circle,
+                                          color: Colors.white),
                                       SizedBox(width: 8),
                                       Text('数据导出成功'),
                                     ],
@@ -195,7 +202,7 @@ class _SettingsScreen extends State<SettingsScreen> {
                           } catch (e) {
                             // 关闭加载指示器
                             Navigator.of(context).pop();
-                            
+
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('导出过程中发生错误：$e'),
@@ -285,11 +292,12 @@ class _SettingsScreen extends State<SettingsScreen> {
 
                           try {
                             var successfullyRestored =
-                                await BackupManager.restore(clearExistingData: true);
-                            
+                                await BackupManager.restore(
+                                    clearExistingData: true);
+
                             // 关闭加载指示器
                             Navigator.of(context).pop();
-                            
+
                             if (successfullyRestored) {
                               // 显示成功对话框
                               showDialog(
@@ -314,13 +322,14 @@ class _SettingsScreen extends State<SettingsScreen> {
                                   );
                                 },
                               );
-                              
+
                               // 同时显示 SnackBar
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Row(
                                     children: [
-                                      Icon(Icons.check_circle, color: Colors.white),
+                                      Icon(Icons.check_circle,
+                                          color: Colors.white),
                                       SizedBox(width: 8),
                                       Text('数据导入成功'),
                                     ],
@@ -332,7 +341,8 @@ class _SettingsScreen extends State<SettingsScreen> {
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('导入失败：请确保选择的是有效的 Florae 备份文件（.json格式）'),
+                                  content: Text(
+                                      '导入失败：请确保选择的是有效的 Florae 备份文件（.json格式）'),
                                   backgroundColor: Colors.red,
                                   duration: Duration(seconds: 4),
                                 ),
@@ -341,7 +351,7 @@ class _SettingsScreen extends State<SettingsScreen> {
                           } catch (e) {
                             // 关闭加载指示器
                             Navigator.of(context).pop();
-                            
+
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('导入过程中发生错误：$e'),
@@ -370,7 +380,7 @@ class _SettingsScreen extends State<SettingsScreen> {
                           showAboutDialog(
                             context: context,
                             applicationName: 'Florae',
-                            applicationVersion: '4.0.1+1',
+                            applicationVersion: '4.1.0+1',
                             applicationLegalese: '© Softice70',
                           );
                         }),

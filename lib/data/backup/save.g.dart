@@ -13,6 +13,10 @@ Save _$SaveFromJson(Map<String, dynamic> json) => Save(
       garden: (json['garden'] as List<dynamic>)
           .map((e) => Plant.fromJson(e as Map<String, dynamic>))
           .toList(),
+      journals: (json['journals'] as List<dynamic>?)
+              ?.map((e) => JournalEntry.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const <JournalEntry>[],
     )
       ..version = (json['version'] as num).toInt()
       ..createdAt = DateTime.parse(json['createdAt'] as String);
@@ -22,4 +26,5 @@ Map<String, dynamic> _$SaveToJson(Save instance) => <String, dynamic>{
       'createdAt': instance.createdAt.toIso8601String(),
       'binaries': instance.binaries.map((e) => e.toJson()).toList(),
       'garden': instance.garden.map((e) => e.toJson()).toList(),
+      'journals': instance.journals.map((e) => e.toJson()).toList(),
     };

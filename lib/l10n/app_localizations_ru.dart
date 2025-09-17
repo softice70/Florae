@@ -82,6 +82,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get labelDescription => 'Описание';
 
   @override
+  String get exampleDescription => 'Supports markdown syntax';
+
+  @override
   String get labelLocation => 'Место';
 
   @override

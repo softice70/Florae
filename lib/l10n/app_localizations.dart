@@ -257,6 +257,12 @@ abstract class AppLocalizations {
   /// **'Description'**
   String get labelDescription;
 
+  /// No description provided for @exampleDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Supports markdown syntax'**
+  String get exampleDescription;
+
   /// No description provided for @labelLocation.
   ///
   /// In en, this message translates to:

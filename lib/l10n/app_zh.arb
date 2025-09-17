@@ -25,6 +25,7 @@
   "labelName": "名称",
   "exampleName": "例如：鸢尾",
   "labelDescription": "详情",
+  "exampleDescription": "支持markdown语法",
   "labelLocation": "位置",
   "exampleLocation": "例如：庭院",
   "labelDayPlanted": "种植日期",

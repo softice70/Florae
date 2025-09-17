@@ -299,6 +299,8 @@ class _ManagePlantScreen extends State<ManagePlantScreen> {
                           icon: const Icon(Icons.topic),
                           labelText:
                               AppLocalizations.of(context)!.labelDescription,
+                          helperText:
+                              AppLocalizations.of(context)!.exampleDescription,
                         ),
                       ),
                       TextFormField(

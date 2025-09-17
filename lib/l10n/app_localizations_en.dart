@@ -82,6 +82,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get labelDescription => 'Description';
 
   @override
+  String get exampleDescription => 'Supports markdown syntax';
+
+  @override
   String get labelLocation => 'Location';
 
   @override

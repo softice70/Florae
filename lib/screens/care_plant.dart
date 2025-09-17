@@ -562,7 +562,18 @@ class _CarePlantScreen extends State<CarePlantScreen> {
                         tileColor: Colors.green.shade50,
                       ),
                       const Divider(height: 1, thickness: 1),
-                      const SizedBox(width: 8),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: Center(
+                          child: Text(
+                            '暂无养护记录',
+                            style: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
           ))
       );

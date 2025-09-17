@@ -1,13 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:florae/data/backup/binary.dart';
 import 'package:florae/data/backup/save.dart';
+import 'package:florae/data/journal.dart';
 import 'package:florae/main.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BackupManager {
   static Future<bool> backup() async {
@@ -15,8 +18,7 @@ class BackupManager {
 
     List<Binary> binaries = [];
 
-    var save = Save(binaries: binaries, garden: plants);
-
+    // 先收集所有二进制图片数据
     for (final plant in plants) {
       if (!plant.picture!.contains("assets/")) {
         File picture = File(plant.picture!);
@@ -27,6 +29,22 @@ class BackupManager {
             fileName: basename(picture.path)));
       }
     }
+
+    // 获取随笔数据
+    List<JournalEntry> journals = [];
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? journalJson = prefs.getString('journal_entries');
+      if (journalJson != null) {
+        List<dynamic> jsonList = json.decode(journalJson);
+        journals = jsonList.map((entry) => JournalEntry.fromJson(entry)).toList();
+      }
+    } catch (e) {
+      print('Failed to load journal entries for backup: $e');
+    }
+
+    // 在所有数据收集完成后再创建Save对象
+    var save = Save(binaries: binaries, garden: plants, journals: journals);
 
     String jsonString = jsonEncode(save);
     List<int> bytes = utf8.encode(jsonString);
@@ -89,6 +107,14 @@ class BackupManager {
         // 如果需要清空现有数据，先清空
         if (clearExistingData) {
           await garden.clearAllData();
+          
+          // 清空随笔数据
+          try {
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            await prefs.remove('journal_entries');
+          } catch (e) {
+            print('Failed to clear journal entries: $e');
+          }
         }
 
         for (var plant in save.garden) {
@@ -97,14 +123,29 @@ class BackupManager {
             var picture = binary.first;
 
             var path = await saveBinaryToFile(
-                base64Decode(picture.base64Data), picture.fileName);
-            plant.picture = path;
-          }
+            base64Decode(picture.base64Data), picture.fileName);
+        plant.picture = path;
+      }
 
-          await garden.addOrUpdatePlant(plant);
-        }
+      await garden.addOrUpdatePlant(plant);
+    }
 
-        return true;
+    // 恢复随笔数据
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      if (save.journals.isNotEmpty) {
+        String journalJson = json.encode(
+            save.journals.map((entry) => entry.toJson()).toList());
+        await prefs.setString('journal_entries', journalJson);
+      } else if (clearExistingData) {
+        // 如果导入的文件没有随笔数据且选择了清空现有数据，则确保随笔数据为空
+        await prefs.remove('journal_entries');
+      }
+    } catch (e) {
+      print('Failed to restore journal entries: $e');
+    }
+
+    return true;
       } else {
         return false;
       }
