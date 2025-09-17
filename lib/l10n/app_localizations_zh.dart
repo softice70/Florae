@@ -121,7 +121,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get clean => '清理';
 
   @override
-  String get now => '现在';
+  String get now => '今天到期';
 
   @override
   String get daysLeft => '天到期';

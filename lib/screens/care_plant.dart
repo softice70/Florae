@@ -339,22 +339,25 @@ class _CarePlantScreen extends State<CarePlantScreen> {
       return SizedBox(
           width: double.infinity,
           child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  Icon(Icons.calendar_today,
-                      size: 20,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant),
-                  const SizedBox(width: 8),
-                  Text(
-                    '无养护记录',
-                    style: Theme.of(context).textTheme.bodyMedium,
+                  semanticContainer: true,
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
                   ),
-                ],
-              ),
-            ),
-          ));
+                  child: Column(
+                    children: [
+                      // 添加标题
+                      ListTile(
+                        leading: const Icon(Icons.calendar_today),
+                        title: const Text('养护记录'),
+                        tileColor: Colors.green.shade50,
+                      ),
+                      const Divider(height: 1, thickness: 1),
+                      const SizedBox(width: 8),
+                    ],
+          ))
+      );
     }
 
     // 按日期排序，最新的在前
@@ -382,32 +385,24 @@ class _CarePlantScreen extends State<CarePlantScreen> {
     return SizedBox(
         width: double.infinity,
         child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Icon(Icons.calendar_today,
-                        size: 20,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant),
-                    const SizedBox(width: 8),
-                    Text(
-                      '养护记录',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const Spacer(),
-                    if (latestDate != null)
-                      IconButton(
-                        icon: const Icon(Icons.history_edu, size: 20),
-                        onPressed: () {
-                          _editLatestDayCareHistory(context, plant, latestDate);
-                        },
-                        tooltip: '修改最近一天的养护记录',
-                      ),
-                  ],
+                ListTile(
+                  leading: const Icon(Icons.calendar_today),
+                  title: const Text('养护记录'),
+                  tileColor: Colors.green.shade50,
+                  trailing: latestDate != null
+                      ? IconButton(
+                          icon: const Icon(Icons.history_edu, size: 20),
+                          onPressed: () {
+                            _editLatestDayCareHistory(context, plant, latestDate);
+                          },
+                          tooltip: '修改最近一天的养护记录',
+                        )
+                      : null,
                 ),
+                const Divider(height: 1, thickness: 1),
                 const SizedBox(height: 8),
                 ...groupedHistory.entries.map((entry) {
                   final date = entry.key;
@@ -477,7 +472,6 @@ class _CarePlantScreen extends State<CarePlantScreen> {
                 }).toList(),
               ],
             ),
-          ),
         ));
   }
 
@@ -599,6 +593,7 @@ class _CarePlantScreen extends State<CarePlantScreen> {
                       trailing: Icon(_isPlantDetailsExpanded 
                           ? Icons.expand_less 
                           : Icons.expand_more),
+                      tileColor: Colors.green.shade50,
                       onTap: () {
                         setState(() {
                           _isPlantDetailsExpanded = !_isPlantDetailsExpanded;
@@ -680,8 +675,18 @@ class _CarePlantScreen extends State<CarePlantScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
-                  child: Column(children: _buildCares(context, plant))),
-              const SizedBox(height: 16),
+                  child: Column(
+                    children: [
+                      // 添加标题
+                      ListTile(
+                        leading: const Icon(Icons.schedule),
+                        title: const Text('定期养护任务'),
+                        tileColor: Colors.green.shade50,
+                      ),
+                      const Divider(height: 1, thickness: 1),
+                      ..._buildCares(context, plant),
+                    ],
+                  )),
               // 历史养护记录
               _buildCareHistory(plant),
               const SizedBox(height: 70),
