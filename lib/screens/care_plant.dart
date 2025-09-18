@@ -505,12 +505,35 @@ class _CarePlantScreen extends State<CarePlantScreen> {
                       details = null;
                     }
 
-                    // 添加到养护历史
-                    plant.careHistory.add(CareHistory(
-                      careDate: selectedDateStart,
-                      careName: temporaryCare.name,
-                      details: details,
-                    ));
+                    // 检查当天是否已有相同类型的养护记录
+                    final existingRecordIndex = plant.careHistory.indexWhere(
+                      (record) => record.careDate == selectedDateStart && record.careName == temporaryCare.name
+                    );
+
+                    if (existingRecordIndex != -1) {
+                      // 如果存在记录且详情不为空，则更新详情
+                      if (details != null) {
+                        plant.careHistory[existingRecordIndex] = CareHistory(
+                          careDate: selectedDateStart,
+                          careName: temporaryCare.name,
+                          details: details,
+                        );
+                      }
+                    } else {
+                      // 如果不存在记录，则添加新记录
+                      plant.careHistory.add(CareHistory(
+                        careDate: selectedDateStart,
+                        careName: temporaryCare.name,
+                        details: details,
+                      ));
+                    }
+
+                    // 更新对应类型的定期养护任务的effected字段
+                    var careIndex = plant.cares
+                        .indexWhere((element) => element.name == temporaryCare.name);
+                    if (careIndex != -1) {
+                      plant.cares[careIndex].effected = selectedDateStart; // 确保只精确到天级别
+                    }
 
                     // 删除临时任务
                     plant.temporaryCares.remove(temporaryCare);

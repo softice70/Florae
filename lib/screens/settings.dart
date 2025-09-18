@@ -380,7 +380,7 @@ class _SettingsScreen extends State<SettingsScreen> {
                           showAboutDialog(
                             context: context,
                             applicationName: 'Florae',
-                            applicationVersion: '4.1.0+1',
+                            applicationVersion: '4.1.1+2',
                             applicationLegalese: '© Softice70',
                           );
                         }),

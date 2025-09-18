@@ -412,7 +412,9 @@ class _ManagePlantScreen extends State<ManagePlantScreen> {
                 location: locationController.text,
                 cares: [],
                 careHistory:
-                    widget.plant != null ? widget.plant!.careHistory : []);
+                    widget.plant != null ? widget.plant!.careHistory : [],
+                temporaryCares:
+                    widget.plant != null ? widget.plant!.temporaryCares : []);
 
             // Assign cares to plant
             newPlant.cares.clear();
