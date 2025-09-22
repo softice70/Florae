@@ -17,6 +17,7 @@ Save _$SaveFromJson(Map<String, dynamic> json) => Save(
               ?.map((e) => JournalEntry.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const <JournalEntry>[],
+      currentCity: json['currentCity'] as String? ?? '',
     )
       ..version = (json['version'] as num).toInt()
       ..createdAt = DateTime.parse(json['createdAt'] as String);
@@ -27,4 +28,5 @@ Map<String, dynamic> _$SaveToJson(Save instance) => <String, dynamic>{
       'binaries': instance.binaries.map((e) => e.toJson()).toList(),
       'garden': instance.garden.map((e) => e.toJson()).toList(),
       'journals': instance.journals.map((e) => e.toJson()).toList(),
+      'currentCity': instance.currentCity,
     };

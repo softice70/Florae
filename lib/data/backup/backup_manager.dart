@@ -37,14 +37,24 @@ class BackupManager {
       String? journalJson = prefs.getString('journal_entries');
       if (journalJson != null) {
         List<dynamic> jsonList = json.decode(journalJson);
-        journals = jsonList.map((entry) => JournalEntry.fromJson(entry)).toList();
+        journals =
+            jsonList.map((entry) => JournalEntry.fromJson(entry)).toList();
       }
-    } catch (e) {
-      print('Failed to load journal entries for backup: $e');
-    }
+    } catch (e) {}
+
+    // 获取城市名称
+    String currentCity = '';
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      currentCity = prefs.getString('currentCity') ?? '';
+    } catch (e) {}
 
     // 在所有数据收集完成后再创建Save对象
-    var save = Save(binaries: binaries, garden: plants, journals: journals);
+    var save = Save(
+        binaries: binaries,
+        garden: plants,
+        journals: journals,
+        currentCity: currentCity);
 
     String jsonString = jsonEncode(save);
     List<int> bytes = utf8.encode(jsonString);
@@ -62,7 +72,7 @@ class BackupManager {
     }
   }
 
-  static Future<bool> restore({bool clearExistingData = false}) async {
+  static Future<bool> restore({bool clearExistingData = false, Function(String)? onCityRestored}) async {
     try {
       // 指定文件类型过滤器，支持 JSON 文件
       FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -74,7 +84,7 @@ class BackupManager {
 
       if (result != null && result.files.isNotEmpty) {
         final pickedFile = result.files.first;
-        
+
         // 优先使用 bytes 数据，如果没有则使用文件路径
         String fileContent;
         if (pickedFile.bytes != null) {
@@ -98,7 +108,8 @@ class BackupManager {
         }
 
         // 验证是否为有效的 Florae 备份文件
-        if (!rawSave.containsKey('garden') || !rawSave.containsKey('binaries')) {
+        if (!rawSave.containsKey('garden') ||
+            !rawSave.containsKey('binaries')) {
           return false;
         }
 
@@ -107,14 +118,12 @@ class BackupManager {
         // 如果需要清空现有数据，先清空
         if (clearExistingData) {
           await garden.clearAllData();
-          
+
           // 清空随笔数据
           try {
             SharedPreferences prefs = await SharedPreferences.getInstance();
             await prefs.remove('journal_entries');
-          } catch (e) {
-            print('Failed to clear journal entries: $e');
-          }
+          } catch (e) {}
         }
 
         for (var plant in save.garden) {
@@ -123,35 +132,43 @@ class BackupManager {
             var picture = binary.first;
 
             var path = await saveBinaryToFile(
-            base64Decode(picture.base64Data), picture.fileName);
-        plant.picture = path;
-      }
+                base64Decode(picture.base64Data), picture.fileName);
+            plant.picture = path;
+          }
 
-      await garden.addOrUpdatePlant(plant);
-    }
+          await garden.addOrUpdatePlant(plant);
+        }
 
-    // 恢复随笔数据
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      if (save.journals.isNotEmpty) {
-        String journalJson = json.encode(
-            save.journals.map((entry) => entry.toJson()).toList());
-        await prefs.setString('journal_entries', journalJson);
-      } else if (clearExistingData) {
-        // 如果导入的文件没有随笔数据且选择了清空现有数据，则确保随笔数据为空
-        await prefs.remove('journal_entries');
-      }
-    } catch (e) {
-      print('Failed to restore journal entries: $e');
-    }
+        // 恢复随笔数据
+        try {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          if (save.journals.isNotEmpty) {
+            String journalJson = json
+                .encode(save.journals.map((entry) => entry.toJson()).toList());
+            await prefs.setString('journal_entries', journalJson);
+          } else if (clearExistingData) {
+            // 如果导入的文件没有随笔数据且选择了清空现有数据，则确保随笔数据为空
+            await prefs.remove('journal_entries');
+          }
+        } catch (e) {}
 
-    return true;
+        // 恢复城市名称
+        try {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          if (save.currentCity.isNotEmpty) {
+            await prefs.setString('currentCity', save.currentCity);
+            // 如果提供了回调函数，调用它通知UI更新
+            if (onCityRestored != null) {
+              onCityRestored(save.currentCity);
+            }
+          }
+        } catch (e) {}
+
+        return true;
       } else {
         return false;
       }
     } catch (ex) {
-      // 记录错误信息以便调试
-      print('Restore error: $ex');
       return false;
     }
   }

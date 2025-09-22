@@ -1,5 +1,5 @@
-import 'package:florae/models/plant.dart';
-import 'package:florae/models/care.dart';
+import 'package:florae/data/plant.dart';
+import 'package:florae/data/care.dart';
 
 class CareHistoryItem {
   final DateTime date;

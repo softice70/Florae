@@ -86,7 +86,34 @@ class _CarePlantScreen extends State<CarePlantScreen> {
       // 如果植物没有这种养护类型，跳过
       if (care.name.isEmpty) continue;
       final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
-      int daysToCare = care.cycles - care.daysSinceLastCare(today);
+      // 计算下次应该执行的日期 - 同时考虑effected字段和养护历史记录
+      DateTime lastCareDate = DateTime(
+        care.effected!.year,
+        care.effected!.month,
+        care.effected!.day,
+      );
+
+      // 找到这个养护类型的最后一次执行日期
+      DateTime? lastSpecificCareDate;
+      for (var history in plant.careHistory.reversed) {
+        if (history.careName == care.name) {
+          lastSpecificCareDate = history.careDate;
+          break;
+        }
+      }
+
+      // 使用更精确的最后一次执行日期
+      if (lastSpecificCareDate != null) {
+        lastCareDate = DateTime(
+          lastSpecificCareDate.year,
+          lastSpecificCareDate.month,
+          lastSpecificCareDate.day,
+        );
+      }
+
+      // 计算距离上次养护的天数
+      int daysSinceLastCare = (today.difference(lastCareDate).inDays).abs();
+      int daysToCare = care.cycles - daysSinceLastCare;
 
       if (careCheck[care] == null) {
         careCheck[care] = false;

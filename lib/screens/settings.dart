@@ -293,7 +293,11 @@ class _SettingsScreen extends State<SettingsScreen> {
                           try {
                             var successfullyRestored =
                                 await BackupManager.restore(
-                                    clearExistingData: true);
+                                    clearExistingData: true,
+                                    onCityRestored: (String restoredCity) {
+                                      print(
+                                          'City name restored: $restoredCity, notifying UI...');
+                                    });
 
                             // 关闭加载指示器
                             Navigator.of(context).pop();
@@ -380,7 +384,7 @@ class _SettingsScreen extends State<SettingsScreen> {
                           showAboutDialog(
                             context: context,
                             applicationName: 'Florae',
-                            applicationVersion: '4.1.1+2',
+                            applicationVersion: '4.1.3+2',
                             applicationLegalese: '© Softice70',
                           );
                         }),

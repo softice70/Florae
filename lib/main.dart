@@ -1,7 +1,7 @@
 import 'package:background_fetch/background_fetch.dart';
 import 'package:florae/screens/error.dart';
-import 'package:florae/themes/darkTheme.dart';
-import 'package:florae/themes/lightTheme.dart';
+import 'package:florae/themes/dark_theme.dart';
+import 'package:florae/themes/light_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
