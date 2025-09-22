@@ -118,18 +118,29 @@ class WeatherService {
         throw Exception('不支持的城市: $cityName');
       }
 
-      // 进行一次API请求
-      final data = await _fetchWeatherData(cityName, cityCode, 'both');
+      // 尝试从缓存获取数据
+      final cachedWeather = weatherCacheManager.getCurrentWeather(cityName);
+      final cachedForecast = weatherCacheManager.getWeatherForecast(cityName);
 
-      // 同时解析两类数据
-      final weather = _parseWeatherFromNewSoJson(data);
-      final forecast = _parseWeatherForecastFromNewSoJson(data);
+      // 检查是否需要刷新数据：如果任意一个缓存不存在或已过期
+      if (cachedWeather == null || cachedForecast == null) {
+        // 进行一次API请求
+        final data = await _fetchWeatherData(cityName, cityCode, 'both');
 
-      // 分别缓存获取的数据
-      weatherCacheManager.setCurrentWeather(cityName, weather);
-      weatherCacheManager.setWeatherForecast(cityName, forecast);
+        // 同时解析两类数据
+        final weather = _parseWeatherFromNewSoJson(data);
+        final forecast = _parseWeatherForecastFromNewSoJson(data);
 
-      return (weather, forecast);
+        // 分别缓存获取的数据
+        weatherCacheManager.setCurrentWeather(cityName, weather);
+        weatherCacheManager.setWeatherForecast(cityName, forecast);
+
+        return (weather, forecast);
+      } else {
+        // 两个缓存都有效，直接返回缓存数据
+        print('DEBUG: WeatherService: Returning cached weather data for $cityName');
+        return (cachedWeather, cachedForecast);
+      }
     } catch (e) {
       print('DEBUG: WeatherService: Error fetching combined weather data: $e');
       // 重新抛出异常，让调用者处理

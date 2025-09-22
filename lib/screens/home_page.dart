@@ -148,7 +148,8 @@ class _MyHomePageState extends State<MyHomePage> {
     try {
       print(
           'DEBUG: Before calling WeatherService.getWeatherData with city: "$_currentCity"');
-      final (weather, forecast) = await _weatherService.getWeatherData(_currentCity);
+      final (weather, forecast) =
+          await _weatherService.getWeatherData(_currentCity);
       print(
           'DEBUG: After calling WeatherService.getWeatherData, received city: "${weather.cityName}"');
 
@@ -467,9 +468,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       // 使用LayoutBuilder获取可用宽度，确保GridList有明确的尺寸约束
                       return SizedBox(
                         width: constraints.maxWidth,
-                        // 基于屏幕高度设置合理的高度，确保内容可以滚动但不会导致无限高度问题
-                        height: MediaQuery.of(context).size.height *
-                            0.70, // 设置为屏幕高度的70%
+                        // 基于屏幕高度减去其他组件高度设置合理的高度
+                        height: 480,
                         child: ResponsiveGridList(
                           // Horizontal space between grid items
                           horizontalGridSpacing: 10,
@@ -553,6 +553,7 @@ class _MyHomePageState extends State<MyHomePage> {
             currentWeather: _currentWeather!,
             forecast: _weatherForecast!,
             onCityEditPress: _changeCity,
+            onUpdateWeather: _fetchWeatherData,
           ),
         ],
       );
