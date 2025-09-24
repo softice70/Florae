@@ -47,7 +47,7 @@ class _WeatherCardState extends State<WeatherCard> {
         borderRadius: BorderRadius.circular(16),
       ),
       elevation: 5,
-      margin: const EdgeInsets.all(8),
+      margin: const EdgeInsets.all(10),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
@@ -74,8 +74,8 @@ class _WeatherCardState extends State<WeatherCard> {
                     // 第一列：城市名称
                     InkWell(
                       onTap: widget.onCityEditPress,
-                    child: Text(
-                      widget.currentWeather.cityName,
+                      child: Text(
+                        widget.currentWeather.cityName,
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: secondaryColor,
@@ -117,62 +117,64 @@ class _WeatherCardState extends State<WeatherCard> {
                 ),
                 const SizedBox(width: 4),
                 // 第四列：当前温度（最右侧）- 可点击更新
-                  GestureDetector(
-                    onTap: () async {
-                      if (!_isUpdating) {
+                GestureDetector(
+                  onTap: () async {
+                    if (!_isUpdating) {
+                      setState(() {
+                        _isUpdating = true;
+                      });
+
+                      try {
+                        await widget.onUpdateWeather();
+                        // 显示Toast提示
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('天气信息已更新'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('更新天气失败: $e'),
+                            duration: Duration(seconds: 2),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      } finally {
                         setState(() {
-                          _isUpdating = true;
+                          _isUpdating = false;
                         });
-                        
-                        try {
-                          await widget.onUpdateWeather();
-                          // 显示Toast提示
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('天气信息已更新'),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('更新天气失败: $e'),
-                              duration: Duration(seconds: 2),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        } finally {
-                          setState(() {
-                            _isUpdating = false;
-                          });
-                        }
                       }
-                    },
-                    child: Stack(
-                      children: [
-                        Text(
-                          WeatherUtils.formatTemperature(widget.currentWeather.temperature),
-                          style: theme.textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: theme.primaryColor,
+                    }
+                  },
+                  child: Stack(
+                    children: [
+                      Text(
+                        WeatherUtils.formatTemperature(
+                            widget.currentWeather.temperature),
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.primaryColor,
+                        ),
+                      ),
+                      if (_isUpdating)
+                        const Positioned(
+                          right: -10,
+                          top: -10,
+                          child: SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.blue),
+                            ),
                           ),
                         ),
-                        if (_isUpdating)
-                          const Positioned(
-                            right: -10,
-                            top: -10,
-                            child: SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
+                    ],
                   ),
+                ),
                 const SizedBox(width: 4),
               ],
             ),
@@ -183,8 +185,8 @@ class _WeatherCardState extends State<WeatherCard> {
               height: 60,
               child: Row(
                 // 将5天的天气预报均匀分布在整行
-                children:
-                    _getFilteredForecastDays(widget.forecast.forecastDays).map((day) {
+                children: _getFilteredForecastDays(widget.forecast.forecastDays)
+                    .map((day) {
                   return Expanded(
                     child: _buildForecastDayCard(context, day, secondTextColor,
                         accentColor, secondaryColor, theme),
@@ -220,7 +222,7 @@ class _WeatherCardState extends State<WeatherCard> {
       return '明天';
     } else {
       const chineseWeekdays = ['日', '一', '二', '三', '四', '五', '六'];
-      return '周${chineseWeekdays[date.weekday]}';
+      return '周${chineseWeekdays[date.weekday - 1]}';
     }
   }
 
@@ -240,7 +242,7 @@ class _WeatherCardState extends State<WeatherCard> {
 
     return Container(
       width: 55,
-      margin: const EdgeInsets.only(right: 8),
+      margin: const EdgeInsets.only(left: 4, right: 4),
       decoration: BoxDecoration(
         color: cardBackgroundColor,
         borderRadius: BorderRadius.circular(8),
@@ -259,16 +261,15 @@ class _WeatherCardState extends State<WeatherCard> {
           Text(
             _getChineseWeekday(day.date),
             style: theme.textTheme.bodySmall?.copyWith(
-              fontSize: 10,
+              fontSize: 11,
               color: textColor,
-              fontWeight: FontWeight.bold,
             ),
             textAlign: TextAlign.center,
           ),
           // 天气图标
           Icon(
             WeatherUtils.getWeatherIcon(day.icon),
-            size: 16,
+            size: 18,
             color: forecastIconColor,
           ),
           // 最高/最低温度 - 分开设置颜色，使最高温更醒目
@@ -279,14 +280,14 @@ class _WeatherCardState extends State<WeatherCard> {
                 TextSpan(
                   text: '${WeatherUtils.formatTemperature(day.tempMax)}/',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontSize: 10,
+                    fontSize: 11,
                     color: secondaryColor,
                   ),
                 ),
                 TextSpan(
                   text: WeatherUtils.formatTemperature(day.tempMin),
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontSize: 10,
+                    fontSize: 11,
                     color: secondaryColor,
                   ),
                 ),
@@ -298,8 +299,6 @@ class _WeatherCardState extends State<WeatherCard> {
     );
   }
 }
-
-
 
 // 城市选择弹窗
 class CitySelectDialog extends StatefulWidget {
